@@ -2,6 +2,7 @@ import numpy as np
 import visdom
 import matplotlib.pyplot as plt
 
+# TODO: remove outliers, and expand it to other models
 
 # viz = visdom.Visdom(env='ransac')
 # viz.scatter(np.random.random((1, 2)), win='line_detect')
