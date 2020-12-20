@@ -62,8 +62,8 @@ if __name__ == '__main__':
     # 重复上述步骤
 
     data_len = len(pts)
-    model_buff = []  # 保存k, b, score
-    sample_num = 1000
+    model_buff = []  # 保存k, b, dist
+    sample_num = 1000  # over all sample time
 
     while sample_num > 0:
         sample_num -= 1
@@ -72,13 +72,13 @@ if __name__ == '__main__':
         # 保证不一样的两个点
         while random_idx[0] == random_idx[1]:
             random_idx = np.random.randint(0, data_len, 2)
-        print('random_idx:', random_idx)
+        # print('random_idx:', random_idx)
 
         # 2.从以上样本估计模型
         pt1, pt2 = pts[random_idx[0]], pts[random_idx[1]]
 
         k, b = get_kb(pt2, pt1)
-        print('{0}, {1}'.format(k, b))
+        # print('{0}, {1}'.format(k, b))
 
         # 评价，将[x, y]代进去，如果点到直线的距离小于某个数值，该模型就得分
         dist = 0  # init dist
