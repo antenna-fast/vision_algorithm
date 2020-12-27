@@ -64,7 +64,7 @@ if __name__ == '__main__':
 
     data_len = len(pts)
     model_buff = []  # 保存k, b, dist
-    sample_num = 1000  # over all sample time
+    sample_num = 100  # over all sample time
 
     while sample_num > 0:
         sample_num -= 1

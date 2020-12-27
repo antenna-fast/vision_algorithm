@@ -8,7 +8,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-
 a = [1, 2, 2, 3, 2, 1, 1, 4, 5, 6.2, 6.1, 3, 1, 2, 5]
 
 len_a = len(a)
@@ -16,10 +15,11 @@ len_a = len(a)
 i = 0  # 开始点
 MaxIdx = []
 
+print(a[i - 1])
+
 while i < len_a - 1:  # i作为索引
-    if a[i] > a[i + 1]:
-        if a[i] >= a[i - 1]:
-            MaxIdx.append(i)
+    if a[i] > a[i + 1] and a[i] >= a[i - 1]:  # 这里有点问题 a[-1]是倒数第一个
+        MaxIdx.append(i)
 
     else:  # a[i] < a[i+1]
         i += 1  # 先跳一个格试探一下 不加也没关系
@@ -29,7 +29,7 @@ while i < len_a - 1:  # i作为索引
         if i < len_a:  # 这时候 a[i] > a[i+1] &&  a[i] < a[i+1]
             MaxIdx.append(i)
 
-    i += 1  # 跳两格
+    i += 1  # 跳格子
 
 print(MaxIdx)
 
