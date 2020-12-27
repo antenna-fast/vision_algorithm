@@ -5,23 +5,21 @@ from scipy.spatial.transform import Rotation as R
 
 import matplotlib.pyplot as plt
 
-
 # SVD实现ICP
 # 基本原理：最小二乘
 
 # 定义变换
-# r = R.from_rotvec(pi / 180 * array([31, 0, 10]))  # 角度->弧度
-r = R.from_rotvec(pi / 180 * array([0, 0, 10]))  # 角度->弧度
+r = R.from_rotvec(pi / 180 * array([0, 20, 10]))  # 角度->弧度
+# r = R.from_rotvec(pi / 180 * array([0, 0, 10]))  # 角度->弧度
 r_mat = r.as_matrix()
-t_vect = array([0, -2, -2], dtype='float')
+t_vect = array([10, -2, -8], dtype='float')
 print('r_mat:\n', r_mat)
-
 
 # 定义被配准的点
 
 pts_1 = []
-for i in range(10):
-    for j in range(10):
+for i in range(100):
+    for j in range(100):
         pts_1.append([i, j, 0])
 
 pts_1 = array(pts_1)
@@ -83,14 +81,14 @@ r_mat_res = dot(dot(Vh, mid_mat), U.T)
 
 print('r_mat_res:\n', r_mat_res)
 
-
 # 得到平移变换
 # t = pts_m_1 - dot(inv(r_mat_res), pts_m_2.T)
 t_res = pts_m_2 - dot(r_mat_res, pts_m_1.T)
 print('t:\n', t_res)
 
 # 变换后的点
-pts_2_res = dot(inv(r_mat_res), pts_2.T).T - t_res
+pts_2_res = dot(inv(r_mat_res), (pts_2 - t_res).T).T  # - t_res
+# pts_2_res = dot(r_mat_res, pts_1.T).T + t_res
 # pts_2_res = pts_2_res.T
 # print('pts_2_res:\n', pts_2_res)
 
