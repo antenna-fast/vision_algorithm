@@ -1,6 +1,8 @@
 # ppf　特征计算模块
 
 import numpy as np
+from numpy import *
+
 
 # 计算连接两点向量
 pt1 = np.array([0, 1])
@@ -12,7 +14,7 @@ link_vector = pt1 - pt2
 # 原理：
 #   向量内积的几何意义：向量a在b上的投影
 a = np.array([1, 0, 0])
-b = np.array([0, 1, 0])
+b = np.array([1, 1, 0])
 # 弧度制
 theta = np.arccos(a.dot(b) / (np.linalg.norm(a) * np.linalg.norm(b)))
 
@@ -26,5 +28,10 @@ print('角度：', theta * 180 / np.pi)
 c = np.cross(a, b)
 print(c)
 
+
+# 通过反正切计算 直接算出来了每个轴上面的夹角
+angle = arctan(cross(a, b) / dot(a, b))
+angle = 180 / pi * angle
+print('ang:', angle)
 
 # 所有的点对：还是判断一下 i != j

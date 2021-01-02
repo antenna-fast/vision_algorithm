@@ -23,3 +23,12 @@ if __name__ == '__main__':
         hash_table[key_temp] = value_temp
 
     print(hash_table)
+
+    # 从哈系表里面取出
+    test_key = '[1, 1, 1, 1]'
+    if test_key in hash_table.keys():
+        test_value = hash_table[test_key]
+        print('test_value:', test_value)
+
+    else:
+        print('没有这个索引')
