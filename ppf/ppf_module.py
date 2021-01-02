@@ -25,3 +25,6 @@ print('角度：', theta * 180 / np.pi)
 # c=axb
 c = np.cross(a, b)
 print(c)
+
+
+# 所有的点对：还是判断一下 i != j
