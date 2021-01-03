@@ -15,6 +15,7 @@ r_mat = r.as_matrix()
 t_vect = array([10, -2, -8], dtype='float')
 print('r_mat:\n', r_mat)
 
+
 # 定义被配准的点
 pts_1 = []
 for i in range(100):
