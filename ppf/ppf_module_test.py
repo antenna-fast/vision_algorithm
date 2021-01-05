@@ -1,9 +1,11 @@
-# ppf　特征计算模块
+# ppf　特征计算 测试模块
 #
 # F(m1, m2) = <d, ang(n1, d), ang(n2, d), ang(n1, n2)>
 # 要取整， 可以视为下采样  长度步长，角度步长
 
 # 问题： 可否保证尺度不变？？
+
+# 本代码使用三对点进行测试
 
 import numpy as np
 from numpy import *
@@ -18,7 +20,7 @@ a_norm = array([1, 0, 0])
 b_norm = array([0, 1, 0])
 
 
-# 计算夹角  注意 这个会导致不稳定，opencv建议使用 arctan！
+# 计算夹角
 # 原理：向量内积的几何意义：向量a在b上的投影   返回弧度制夹角
 def get_ang(a, b):
     theta = np.arccos(a.dot(b) / (np.linalg.norm(a) * np.linalg.norm(b)))
@@ -131,8 +133,7 @@ if __name__ == '__main__':
             ppf_vec[0] = (ppf_vec[0] / d_step).astype(int)
             ppf_vec[1:] = (ppf_vec[1:] / a_step).astype(int)
 
-            # 通过查找哈希表得到 <mr, mi>，然后把<sr, si>和<mr, mi>统一到同一个坐标系 得到Tmg Tsg
-            # 以及Alpha  （mi与si之间的夹角）
+            # 通过查找哈希表得到 <mr, mi>，然后把<sr, si>和<mr, mi>统一到同一个坐标系
 
     o3d.visualization.draw_geometries([pcd,
                                        pcd2,
