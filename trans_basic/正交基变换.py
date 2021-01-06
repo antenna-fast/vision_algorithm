@@ -24,6 +24,7 @@ for i in range(-10, 10):
 pts_buff = array(pts_buff)
 pts = copy.deepcopy(pts_buff)
 
+
 # ax = plt.figure(1).gca(projection='3d')
 #
 # ax.plot(pts_buff.T[0], pts_buff.T[1], pts_buff.T[2], 'g.')
@@ -34,16 +35,14 @@ pts = copy.deepcopy(pts_buff)
 # plt.show()
 
 # 求出平面坐标系
-def get_coord(pts):
-
-    average_data = np.mean(pts, axis=0)  # 求 NX3 向量的均值
-    decentration_matrix = pts - average_data  # 去中心化
+def get_coord(now_pt, vici_pts):
+    # average_data = np.mean(vici_pts, axis=0)  # 求 NX3 向量的均值
+    decentration_matrix = vici_pts - now_pt  # 邻域点连接到顶点的向量
+    # decentration_matrix = vici_pts - average_data  # 邻域点连接到顶点的向量
     H = np.dot(decentration_matrix.T, decentration_matrix)  # 求解协方差矩阵 H
 
     U, s, Vh = svd(H)  # U.shape, s.shape, Vh.shape
-    # print('U:\n', U)
-    # print('s:\n', s)
-    # print('Vh:\n', Vh)
+
     # 排序索引 由小到大
     # x_axis, y_axis, z_axis = Vh  # 由大到小排的 对应xyz轴
     return Vh.T  # 以列向量表示三个坐标轴
@@ -87,7 +86,8 @@ def get_non_manifold_vertex_mesh(verts, triangles):
     return mesh
 
 
-coord = get_coord(pts_buff)  # 平面的旋转坐标变换
+# now_pt, vici_pts
+coord = get_coord(pts_buff[0], pts_buff)  # 平面的旋转坐标变换
 
 coord_inv = inv(coord)  # 反变换
 roto_pts = dot(coord_inv, pts_buff.T).T  # 将平面旋转到与z平行
@@ -96,7 +96,6 @@ pts_buff = roto_pts
 pts_buff[:, 2] = 0  # 已经投影到xoy(最大平面),在此消除z向轻微抖动
 
 pts_2d = pts_buff[:, 0:2]
-
 
 # 三角化 找到拓扑结构
 tri = Delaunay(pts_2d)
@@ -121,7 +120,6 @@ mesh.compute_triangle_normals()
 # print(array(mesh.triangle_normals))
 
 if __name__ == '__main__':
-
     # print(pts_2d)  # 对这个坐标三角化  三角化后得到三角形的顶点索引,根据这个索引从点云中检索,得到三维mesh的索引,构建mesh,求法向量
 
     ax = plt.figure(1).gca(projection='3d')

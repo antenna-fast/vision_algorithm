@@ -53,8 +53,8 @@ pcd_tree2 = o3d.geometry.KDTreeFlann(pcd2)
 # 输出
 def get_mesh(now_pt, vici_pts):
     # 对每个邻域:
-    # 得到邻域局部坐标系 得到法向量等等
-    coord = get_coord(vici_pts)  # 列向量表示三个轴
+    # 输入当前点以及邻域，得到邻域局部坐标系 得到法向量等等
+    coord = get_coord(now_pt, vici_pts)  # 返回:列向量表示三个轴
     normal = coord[:, 2]  # 第三列
     # print('coord:\n', coord)
 
