@@ -2,7 +2,6 @@ from numpy import *
 import matplotlib.pyplot as plt
 
 l = array([1, 1, 1])
-
 l_n = array([l[0], l[1]])
 
 # 生成数据点

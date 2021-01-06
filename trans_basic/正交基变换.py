@@ -24,10 +24,23 @@ for i in range(-10, 10):
 pts_buff = array(pts_buff)
 pts = copy.deepcopy(pts_buff)
 
+# ax = plt.figure(1).gca(projection='3d')
+#
+# ax.plot(pts_buff.T[0], pts_buff.T[1], pts_buff.T[2], 'g.')
+# ax.set_xlabel("X Axis")
+# ax.set_ylabel("Y Axis")
+# ax.set_zlabel("Z Axis")
+# plt.title('point cloud')
+# plt.show()
 
 # 求出平面坐标系
 def get_coord(pts):
-    U, s, Vh = svd(pts)  # U.shape, s.shape, Vh.shape
+
+    average_data = np.mean(pts, axis=0)  # 求 NX3 向量的均值
+    decentration_matrix = pts - average_data  # 去中心化
+    H = np.dot(decentration_matrix.T, decentration_matrix)  # 求解协方差矩阵 H
+
+    U, s, Vh = svd(H)  # U.shape, s.shape, Vh.shape
     # print('U:\n', U)
     # print('s:\n', s)
     # print('Vh:\n', Vh)
@@ -115,8 +128,6 @@ if __name__ == '__main__':
 
     # a = pts_buff
     ax.plot(pts_buff.T[0], pts_buff.T[1], pts_buff.T[2], 'g.')
-    # ax.plot(a[0], a[1], a[2], 'o')
-    # ax.plot(x[0], x[1], x[2], 'r.')
     ax.set_xlabel("X Axis")
     ax.set_ylabel("Y Axis")
     ax.set_zlabel("Z Axis")
