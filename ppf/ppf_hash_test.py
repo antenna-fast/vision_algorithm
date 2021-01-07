@@ -17,7 +17,7 @@ if __name__ == '__main__':
     # for key in all_key:
     if key_temp in hash_table.keys():
         print('已经存在')
-        hash_table[key].append(value_temp)
+        hash_table[key_temp].append(value_temp)
     else:
         print('尚不存在，需要新建')
         hash_table[key_temp] = value_temp

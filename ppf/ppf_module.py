@@ -10,7 +10,6 @@ from numpy import *
 from numpy.linalg import *
 import open3d as o3d
 
-
 a = np.array([1, 0, 0])
 b = np.array([0, 1, 0])
 
@@ -20,37 +19,38 @@ b_norm = array([0, 1, 0])
 
 # 计算夹角  注意 这个会导致不稳定，opencv建议使用 arctan！
 # 原理：向量内积的几何意义：向量a在b上的投影   返回弧度制夹角
-def get_ang(a, b):
-    theta = np.arccos(a.dot(b) / (np.linalg.norm(a) * np.linalg.norm(b)))
-
+def get_ang(vec_1, vec_2):
+    theta = arccos(dot(vec_1, vec_2) / (norm(vec_1) * norm(vec_2))) * 180 / pi
+    # 角度制
+    # theta = theta
     return theta
 
 
 def get_ppf(pt1, pt2, n1, n2):
     d = pt1 - pt2
     d_lenth = norm(d)
-    d_unit = d / d_lenth
+    # d_unit = d / d_lenth  # 单位化 顶点连接向量
     # print('连线：', link_vector)
 
     alpha_n1_d = get_ang(n1, d)
     alpha_n2_d = get_ang(n2, d)
-    alpha_n1_n2 = get_ang(a_norm, b_norm)
+    alpha_n1_n2 = get_ang(n1, n2)
 
     ppf_vec = array([d_lenth, alpha_n1_d, alpha_n2_d, alpha_n1_n2])
     return ppf_vec
 
 
-# 外积  可以将a写成反对陈矩阵，然后写成矩阵与向量b的乘法
-# 几何意义：
-#   两个向量张成四边形的有向面积，只对三维向量有意义
-# c=axb
-c = np.cross(a, b)
-print(c)
+# # 外积  可以将a写成反对陈矩阵，然后写成矩阵与向量b的乘法
+# # 几何意义：
+# #   两个向量张成四边形的有向面积，只对三维向量有意义
+# # c=axb
+# c = np.cross(a, b)
+# print(c)
 
 
 if __name__ == '__main__':
     # 加载数据
-    pcd = o3d.io.read_point_cloud('../imbalance_points(1)/imbalance_points/data_ply/Armadillo.ply')
+    pcd = o3d.io.read_point_cloud('../data_ply/Armadillo.ply')
     # pcd = o3d.io.read_point_cloud('data_ply/dragon_vrip.ply')
     pcd.paint_uniform_color([0.0, 0.5, 0.5])
 
@@ -77,27 +77,8 @@ if __name__ == '__main__':
 
     pcd_trans_normal = array(pcd2.normals)
 
+    pts_num = len(pcd_trans)
     # 以索引进行保存
-
-    # PPF参数设定
-    d_step = 0.1
-    a_step = 5
-
-    num_pts = 1000
-    for i in range(num_pts):
-        pt_i = pcd_pt[i]
-        pt_i_n = pcd_norm[i]
-        for j in range(num_pts):
-            pt_j = pcd_trans[j]
-            pt_j_n = pcd_trans_normal[j]
-
-            # 计算<mi, mj>的PPF
-
-            ppf_vec = get_ppf(pt_i, pt_j, pt_i_n, pt_j_n)  # pt1, pt2, n1, n2
-
-            # 特征离散化
-            ppf_vec[0] = (ppf_vec[0] / d_step).astype(int)
-            ppf_vec[1:] = (ppf_vec[1:] / a_step).astype(int)
 
     # 从构建pcd1 线下构建
     # pick one point
@@ -108,18 +89,62 @@ if __name__ == '__main__':
 
     # 全据特征描述是从PPF特征描述到模型的映射
 
+    # PPF参数设定
+    d_step = 5
+    a_step = 10
+
+    # 建立哈系表
+    hash_table = {}
+
+    for i in range(pts_num):
+
+        pt_i = pcd_pt[i]
+        pt_i_n = pcd_norm[i]
+        for j in range(pts_num):
+            if j != i:  # 不同的点之间比较
+                pt_j = pcd_trans[j]
+                pt_j_n = pcd_trans_normal[j]
+
+                # print('n: {0}  {1}'.format(pt_i_n, pt_j_n))
+                # 计算<mi, mj>的PPF
+
+                ppf_vec = get_ppf(pt_i, pt_j, pt_i_n, pt_j_n)  # pt1, pt2, n1, n2
+
+                # 特征离散化
+                ppf_vec[0] = (ppf_vec[0] / d_step).astype(int)
+                ppf_vec[1:] = (ppf_vec[1:] / a_step).astype(int)
+
+                # print(ppf_vec)
+                key_temp = str(ppf_vec)
+                value_temp = [i, j]
+
+                # 将特征push到hash
+                if key_temp in hash_table.keys():
+                    # print('已经存在')
+                    hash_table[key_temp].append(value_temp)
+                else:
+                    # print('尚不存在，需要新建')
+                    hash_table[key_temp] = value_temp
+
+        print(i / pts_num)  # 进度
+
+    print(hash_table)
+    savetxt('hash_table.txt', hash_table)
+
     # 以pcd2作为场景 线上
-        # 先选定一系列参考点
-        # 其他所有的点和参考点 进行计算点对特征
-        # 这些特征与模型的全局描述进行匹配？ 每一个潜在的匹配 投票位姿（相对于参考点）
-        #
+    # 先选定一系列参考点
+    # 其他所有的点和参考点 进行计算点对特征
+    # 这些特征与模型的全局描述进行匹配？ 每一个潜在的匹配 投票位姿（相对于参考点）
+    #
 
     # 场景中的所有点
-    scene_pts = 1
-    num_scene_pts = 1
+    scene_pts = len(array(pcd2.points))
+    num_scene_pts = len(array(pcd2.points))
+
     # 首先对场景进行采样，得到参考点
-    scene_pts_r = 1
-    num_pts_scene_r = 100
+    pcd2_r = pcd2.voxel_down_sample(voxel_size=10)
+    scene_pts_r = array(pcd2_r.points)
+    num_pts_scene_r = len(scene_pts_r)
 
     for i in range(num_pts_scene_r):  # 参考点对其他所有点的特征
         pt_i = scene_pts_r[i]  # 参考点

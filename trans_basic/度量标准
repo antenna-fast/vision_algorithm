@@ -1,0 +1,12 @@
+ i)smoothing,
+ ii) noise disturbance,
+ iii) scaling.
+
+参考文献：15 提出了ebuxilong 重复度
+小于设定距离就行
+
+计算方法：
+rate = Ri / min(I1, I2)
+
+Ri 是重复的点集
+I1, I2是在两个里面检测出来的关键点个数

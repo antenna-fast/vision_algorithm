@@ -122,8 +122,12 @@ vici_num = 9
 
 pts_num = len(pcd.points)
 
+key_pts_1_idx = []
+key_pts_2_idx = []
+
 # i = 1500
 # 模型1
+
 for i in range(pts_num):
 # if 1:
     # print("Paint the 1500th point red.")
@@ -161,6 +165,7 @@ for i in range(pts_num):
     if var_cos > 0.05:
         pcd.colors[pick_idx] = [1, 0, 0]  # 选一个点
 
+        key_pts_1_idx.append(pick_idx)  # 将索引添加到缓存
 
 # print(histo)
 
@@ -202,14 +207,20 @@ for i in range(pts_num):
 
     if var_cos > 0.05:
         pcd2.colors[pick_idx] = [1, 0, 0]  # 选一个点
+        key_pts_2_idx.append(pick_idx)
+
+print(key_pts_1_idx)
+print(len(key_pts_1_idx))
+print(key_pts_2_idx)
+print(len(key_pts_2_idx))
 
 axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=8, origin=[0, 0, 0])
 
 o3d.visualization.draw_geometries([pcd,
                                    pcd2,
                                    axis_pcd,
-                                   mesh1,
-                                   mesh2
+                                   # mesh1,
+                                   # mesh2
                                    ],
                                   window_name='ANTenna3D',
                                   # zoom=0.3412,

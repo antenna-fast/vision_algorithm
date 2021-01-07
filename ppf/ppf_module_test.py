@@ -23,7 +23,7 @@ b_norm = array([0, 1, 0])
 # 计算夹角
 # 原理：向量内积的几何意义：向量a在b上的投影   返回弧度制夹角
 def get_ang(a, b):
-    theta = np.arccos(a.dot(b) / (np.linalg.norm(a) * np.linalg.norm(b)))
+    theta = arccos(a.dot(b) / (linalg.norm(a) * linalg.norm(b)))
 
     return theta
 
@@ -52,6 +52,7 @@ print(c)
 
 if __name__ == '__main__':
     # 加载数据
+    # 模型1
     pcd = o3d.io.read_point_cloud('../imbalance_points(1)/imbalance_points/data_ply/Armadillo.ply')
     # pcd = o3d.io.read_point_cloud('data_ply/dragon_vrip.ply')
     pcd.paint_uniform_color([0.0, 0.5, 0.5])
@@ -65,6 +66,7 @@ if __name__ == '__main__':
     pcd_pt = array(pcd.points)
     pcd_norm = array(pcd.normals)
 
+    # 模型2
     pcd_trans = array(pcd.points)  # nx3
     # pcd_trans = dot(r_mat, pcd_trans.T).T
     pcd_trans = pcd_trans + array([130, 0, 0])

@@ -14,7 +14,7 @@ for i in range(-10, 10):
 pts_buff = array(pts_buff)
 
 # 被投影点
-a = array([-5, 5, 5])
+a = array([-5, 5, 5]).astype(int)
 
 
 # 输入:点 平面 平面法向量
@@ -32,6 +32,9 @@ def pt_to_plan(a, p, p_n):
 if __name__ == '__main__':
     x = pt_to_plan(a, p, p_n)
 
+    a = a[:, newaxis]
+    x = x[:, newaxis]
+
     ax = plt.figure(1).gca(projection='3d')
 
     ax.plot(pts_buff.T[0], pts_buff.T[1], pts_buff.T[2], 'g.')
@@ -43,7 +46,8 @@ if __name__ == '__main__':
 
     # plt.axis("equal")
     # plt.axis("auto")
-
+    # ax.set_aspect('equal')
+    ax.set_zlim(-10, 10)
     plt.title('point cloud')
     plt.show()
 

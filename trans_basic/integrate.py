@@ -85,9 +85,9 @@ def get_mesh(now_pt, vici_pts):
     # print(tri_idx)
 
     # 可视化二维的投影
-    # plt.triplot(pts_2d[:, 0], pts_2d[:, 1], tri.simplices.copy())
-    # plt.plot(pts_2d[:, 0], pts_2d[:, 1], 'o')
-    # plt.show()
+    plt.triplot(pts_2d[:, 0], pts_2d[:, 1], tri.simplices.copy())
+    plt.plot(pts_2d[:, 0], pts_2d[:, 1], 'o')
+    plt.show()
 
     # 根据顶点和三角形索引创建mesh
     mesh = get_non_manifold_vertex_mesh(all_pts, tri_idx)
@@ -139,13 +139,25 @@ mesh2 = get_mesh(now_pt, vici_pts)
 
 # print(dir(mesh))
 
+diameter = np.linalg.norm(asarray(pcd2.get_max_bound()) - asarray(pcd2.get_min_bound()))
+
+print("Define parameters used for hidden_point_removal")
+camera = [150, 0, diameter]
+radius = diameter * 1000
+
+print("Get all points that are visible from given view point")
+_, pt_map = pcd2.hidden_point_removal(camera, radius)
+
+print("Visualize result")
+pcd2 = pcd2.select_by_index(pt_map)
+
 axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=8, origin=[0, 0, 0])
 
 o3d.visualization.draw_geometries([pcd,
                                    pcd2,
                                    axis_pcd,
                                    mesh,
-                                   mesh2
+                                   # mesh2
                                    ],
                                   window_name='ANTenna3D',
                                   # zoom=0.3412,
