@@ -40,7 +40,7 @@ pcd_trans = pcd_trans + t_vect
 
 # 加噪声
 
-noise_mode = 1  # 0 for vstack and 1 for jatter
+noise_mode = 2  # 0 for vstack and 1 for jatter
 
 noise_rate = 0.1  # 噪声占比
 
@@ -50,17 +50,25 @@ if noise_mode == 0:
     cov = eye(3) * 1000
     # cov = eye(3)*diameter  # 直径的多少倍率
 
+    pts_num = len(pcd_trans)
+    noise_pts_num = int(pts_num * noise_rate)
+    noise = random.multivariate_normal(mean, cov, noise_pts_num)
+    # print('noise.shape:', noise.shape)
+    # 对噪声变换到场景坐标系
+
+    noise_trans = dot(r_mat, noise.T).T + t_vect
+
 if noise_mode == 1:
-    cov = eye(3) * 10  # 直径的多少倍率
+    cov = eye(3)   # 直径的多少倍率
 
-pts_num = len(pcd_trans)
-noise_pts_num = int(pts_num * noise_rate)
-noise = random.multivariate_normal(mean, cov, noise_pts_num)
-# print('noise.shape:', noise.shape)
+    pts_num = len(pcd_trans)
+    noise_pts_num = int(pts_num * noise_rate)
+    noise = random.multivariate_normal(mean, cov, noise_pts_num)
+    # print('noise.shape:', noise.shape)
 
-# 对噪声变换到场景坐标系
+    # 对噪声变换到场景坐标系
 
-noise_trans = dot(r_mat, noise.T).T + t_vect
+    noise_trans = dot(r_mat, noise.T).T + t_vect
 
 if noise_mode == 0:
     # 方式1 将噪声塞进去
@@ -71,6 +79,10 @@ if noise_mode == 1:
     # 第二种 不改变点的整体数量,直接对采样的点添加
     rand_choose = np.random.randint(0, pts_num, noise_pts_num)
     pcd_trans[rand_choose] += noise
+
+# 不加噪声
+else:
+    pass
 
 pcd2 = o3d.geometry.PointCloud()
 pcd2.points = o3d.utility.Vector3dVector(pcd_trans)

@@ -12,7 +12,7 @@ from scipy.spatial import Delaunay
 
 # 加载 1
 pcd = o3d.io.read_point_cloud('../data_ply/Armadillo.ply')
-pcd = pcd.voxel_down_sample(voxel_size=2)
+pcd = pcd.voxel_down_sample(voxel_size=4)
 pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=8, max_nn=10))
 pcd.paint_uniform_color([0.0, 0.5, 0.1])
 # 构建搜索树
@@ -32,19 +32,45 @@ pcd_trans = dot(r_mat, pcd_trans.T).T
 pcd_trans = pcd_trans + t_vect
 
 # 加噪声
-noise_rate = 0.1  # 噪声占比
 
-mean = array([1, 1, 0])
-cov = eye(3)
+noise_mode = 1  # 0 for vstack and 1 for jatter
+
+noise_rate = 0.01  # 噪声占比
+
+mean = array([0, 0, 0])
+
+if noise_mode == 0:
+    cov = eye(3) * 1000
+    # cov = eye(3)*diameter  # 直径的多少倍率
+
+if noise_mode == 1:
+    cov = eye(3)   # 直径的多少倍率
+
 pts_num = len(pcd_trans)
-noise_pts_num = pts_num * noise_rate
+noise_pts_num = int(pts_num * noise_rate)
 noise = random.multivariate_normal(mean, cov, noise_pts_num)
-# pcd_trans += noise
-print('noise.shape:', noise.shape)
+# print('noise.shape:', noise.shape)
 
-# 方式1 将噪声塞进去
+# 对噪声变换到场景坐标系
 
-# 方式2 对每个点进行平移
+noise_trans = dot(r_mat, noise.T).T + t_vect
+
+if noise_mode == 0:
+    # 方式1 将噪声塞进去
+    pcd_trans = vstack((pcd_trans, noise_trans))
+
+if noise_mode == 1:
+    # 方式2 对模型点跳动
+    # 第二种 不改变点的整体数量,直接对采样的点添加
+    rand_choose = np.random.randint(0, pts_num, noise_pts_num)
+    pcd_trans[rand_choose] += noise
+
+pcd2 = o3d.geometry.PointCloud()
+pcd2.points = o3d.utility.Vector3dVector(pcd_trans)
+
+print('pcd1_num:', len(pcd.points))
+print('pcd2_num:', len(pcd2.points))
+
 
 pcd2 = o3d.geometry.PointCloud()
 pcd2.points = o3d.utility.Vector3dVector(pcd_trans)
