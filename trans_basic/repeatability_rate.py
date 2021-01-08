@@ -97,6 +97,11 @@ def get_repeate_rate(pcd_np, pcd_trans, r_mat, t_vect):
 # 索引不一致
 # 搜索得到最近邻
 
+def get_repeate_rate_2():
+
+    return rate
+
+
 repeat_num = 0
 
 vici_num = 2  # 2近邻 包含他自己
@@ -136,7 +141,7 @@ for pt_idx in range(pts_num):
     dist = sqrt(sum((pt_1 - vici_pts)**2))
     print(dist)
 
-    if dist < 1:
+    if dist < 1:  # 距离阈值
         repeat_num += 1
 
     # print(pt_idx / all_repeat)
@@ -149,7 +154,6 @@ if __name__ == '__main__':
 
     # 先直接使用原始数据
     # 基于索引,然后查找最近点,如果距离小于某个数值就算重合
-    # for pt in pcd_np:
 
     axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=8, origin=[0, 0, 0])
 
