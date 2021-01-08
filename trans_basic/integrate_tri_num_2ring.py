@@ -32,11 +32,19 @@ pcd_trans = dot(r_mat, pcd_trans.T).T
 pcd_trans = pcd_trans + t_vect
 
 # 加噪声
+noise_rate = 0.1  # 噪声占比
+
 mean = array([1, 1, 0])
 cov = eye(3)
-pts_noise = len(pcd_trans)
-noise = random.multivariate_normal(mean, cov, pts_noise)
-pcd_trans += noise
+pts_num = len(pcd_trans)
+noise_pts_num = pts_num * noise_rate
+noise = random.multivariate_normal(mean, cov, noise_pts_num)
+# pcd_trans += noise
+print('noise.shape:', noise.shape)
+
+# 方式1 将噪声塞进去
+
+# 方式2 对每个点进行平移
 
 pcd2 = o3d.geometry.PointCloud()
 pcd2.points = o3d.utility.Vector3dVector(pcd_trans)

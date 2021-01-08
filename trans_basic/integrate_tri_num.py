@@ -11,7 +11,7 @@ from scipy.spatial import Delaunay
 
 # 加载 1
 pcd = o3d.io.read_point_cloud('../data_ply/Armadillo.ply')
-pcd = pcd.voxel_down_sample(voxel_size=2)
+pcd = pcd.voxel_down_sample(voxel_size=3)
 pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=8, max_nn=10))
 pcd.paint_uniform_color([0.0, 0.5, 0.1])
 # 构建搜索树
@@ -19,6 +19,14 @@ pcd_tree_1 = o3d.geometry.KDTreeFlann(pcd)
 
 # 加载 2
 pcd_trans = array(pcd.points)  # nx3
+
+# 计算点云直径
+dx = pcd_trans[:, 0].max() - pcd_trans[:, 0].min()
+dy = pcd_trans[:, 1].max() - pcd_trans[:, 1].min()
+dz = pcd_trans[:, 2].max() - pcd_trans[:, 2].min()
+diameter = sqrt(norm([dx ** 2, dy ** 2, dz ** 2]))
+# print(dx, dy, dz)
+print(diameter)
 
 # 定义变换
 r = R.from_rotvec(pi / 180 * array([30, 60, 30]))  # 角度->弧度
@@ -31,14 +39,44 @@ pcd_trans = dot(r_mat, pcd_trans.T).T
 pcd_trans = pcd_trans + t_vect
 
 # 加噪声
-mean = array([1, 1, 0])
-cov = eye(3)
-pts_noise = len(pcd_trans)
-noise = random.multivariate_normal(mean, cov, pts_noise)
-# pcd_trans += noise
+
+noise_mode = 1  # 0 for vstack and 1 for jatter
+
+noise_rate = 0.1  # 噪声占比
+
+mean = array([1, 0, 1])
+
+if noise_mode == 0:
+    cov = eye(3) * 1000
+    # cov = eye(3)*diameter  # 直径的多少倍率
+
+if noise_mode == 1:
+    cov = eye(3) * 10  # 直径的多少倍率
+
+pts_num = len(pcd_trans)
+noise_pts_num = int(pts_num * noise_rate)
+noise = random.multivariate_normal(mean, cov, noise_pts_num)
+# print('noise.shape:', noise.shape)
+
+# 对噪声变换到场景坐标系
+
+noise_trans = dot(r_mat, noise.T).T + t_vect
+
+if noise_mode == 0:
+    # 方式1 将噪声塞进去
+    pcd_trans = vstack((pcd_trans, noise_trans))
+
+if noise_mode == 1:
+    # 方式2 对模型点跳动
+    # 第二种 不改变点的整体数量,直接对采样的点添加
+    rand_choose = np.random.randint(0, pts_num, noise_pts_num)
+    pcd_trans[rand_choose] += noise
 
 pcd2 = o3d.geometry.PointCloud()
 pcd2.points = o3d.utility.Vector3dVector(pcd_trans)
+
+print('pcd1_num:', len(pcd.points))
+print('pcd2_num:', len(pcd2.points))
 
 # print("Recompute the normal of the downsampled point cloud")
 pcd2.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=8, max_nn=10))
@@ -95,10 +133,10 @@ def get_mesh(now_pt, vici_pts):
     tri_num = len(tri_idx)
     # print(tri_num)
 
-    if tri_num in histo.keys():
-        histo[tri_num] += 1
-    else:
-        histo[tri_num] = 1
+    # if tri_num in histo.keys():
+    #     histo[tri_num] += 1
+    # else:
+    #     histo[tri_num] = 1
 
     # 可视化二维的投影
     # plt.triplot(pts_2d[:, 0], pts_2d[:, 1], tri.simplices.copy())
@@ -125,7 +163,7 @@ pts_num = len(pcd.points)
 # i = 1500
 # 模型1
 for i in range(pts_num):
-# if 1:
+    # if 1:
     # print("Paint the 1500th point red.")
     pick_idx = i
     now_pt_1 = array(pcd.points[pick_idx])
@@ -161,12 +199,12 @@ for i in range(pts_num):
     if var_cos > 0.05:
         pcd.colors[pick_idx] = [1, 0, 0]  # 选一个点
 
-
 # print(histo)
+pts_num_2 = len(pcd2.points)
 
 # 变换后
-for i in range(pts_num):
-# if 1:
+for i in range(pts_num_2):
+    # if 1:
     # print("Paint the 1500th point red.")
     pick_idx = i
     now_pt_2 = array(pcd2.points[pick_idx])
