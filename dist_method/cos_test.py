@@ -10,7 +10,7 @@ e = array([-1, -1])
 
 # cos_ang = dot(a, b) / (norm(a)*norm(b))
 # cos_ang = dot(a, c) / (norm(a)*norm(c))
-# cos_ang = dot(a, d) / (norm(a)*norm(d))
-cos_ang = dot(a, e) / (norm(a)*norm(e))
+cos_ang = dot(a, d) / (norm(a)*norm(d))
+# cos_ang = dot(a, e) / (norm(a)*norm(e))
 
 print(cos_ang)

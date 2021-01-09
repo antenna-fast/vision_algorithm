@@ -9,9 +9,11 @@ from dist import *  # 距离计算
 
 from scipy.spatial import Delaunay
 
+# TODO:将度量改成KL散度 + 方差
+
 # 加载 1
 pcd = o3d.io.read_point_cloud('../data_ply/Armadillo.ply')
-pcd = pcd.voxel_down_sample(voxel_size=3)
+pcd = pcd.voxel_down_sample(voxel_size=1)
 pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=8, max_nn=10))
 pcd.paint_uniform_color([0.0, 0.5, 0.1])
 # 构建搜索树
@@ -142,7 +144,7 @@ def get_mesh(now_pt, vici_pts):
     # print(tri_idx)
 
     # 统计三角形的数量
-    tri_num = len(tri_idx)
+    # tri_num = len(tri_idx)
     # print(tri_num)
 
     # if tri_num in histo.keys():
@@ -170,14 +172,12 @@ def get_mesh(now_pt, vici_pts):
 
 vici_num = 9
 
-pts_num = len(pcd.points)
+pts_num_1 = len(pcd.points)
 
-i = 150
+# i = 1500
 # 模型1
-key_pts_buff_1 = []
-
-# for i in range(pts_num):
-if 1:
+for i in range(pts_num_1):
+# for i in range(1):
     # print("Paint the 1500th point red.")
     pick_idx = i
     now_pt_1 = array(pcd.points[pick_idx])
@@ -197,13 +197,15 @@ if 1:
 
     n_fn_angle = []
     for f_normal in mesh_normals:
-        # ang = arccos(dot(f_normal, vtx_normal) / (linalg.norm(f_normal) * linalg.norm(vtx_normal)))
-        ang = (dot(f_normal, vtx_normal) / (linalg.norm(f_normal) * linalg.norm(vtx_normal)))
+
         # ang = get_cos_dist(f_normal, vtx_normal)  # 两个向量的余弦值
+        ang = get_cos_dist(f_normal, vtx_normal)  # 两个向量的余弦值
         n_fn_angle.append(ang)
         # print(ang)
 
-    print('angle:', n_fn_angle)
+    n_fn_angle = sort(n_fn_angle)[:8]
+    n_fn_angle = (array(n_fn_angle)+1) / 2
+    # print('angle:', n_fn_angle)
 
     # 计算mesh法向量的离散程度   # 统计余弦值的方差
     var_cos = var(n_fn_angle, axis=0)
@@ -212,22 +214,17 @@ if 1:
     # 如果当前邻域的离散程度超过阈值，就标记出
     if var_cos > 0.05:
         pcd.colors[pick_idx] = [1, 0, 0]  # 选一个点
-        key_pts_buff_1.append(array(pcd.points[pick_idx]))
-
-savetxt('save_file/key_pts_buff_1.txt', key_pts_buff_1)
 
 # print(histo)
 pts_num_2 = len(pcd2.points)
 
 # 变换后
-key_pts_buff_2 = []
-# for i in range(pts_num_2):
-if 1:
+for i in range(pts_num_2):
+    # if 1:
     # print("Paint the 1500th point red.")
     pick_idx = i
     now_pt_2 = array(pcd2.points[pick_idx])
     # pcd2.colors[pick_idx] = [1, 0, 0]  # 选一个点
-    # print(now_pt_2 - now_pt_1)  # 证明是变换后
 
     # print("Find its nearest neighbors, and paint them blue.")
     [k, idx_2, _] = pcd_tree2.search_knn_vector_3d(pcd2.points[pick_idx], vici_num)
@@ -249,6 +246,7 @@ if 1:
         # ang = (dot(f_normal, vtx_normal2) / (linalg.norm(f_normal) * linalg.norm(vtx_normal2)))
         ang = get_cos_dist(f_normal, vtx_normal2)
         n_fn_angle.append(ang)
+    n_fn_angle = array(n_fn_angle)
 
     print('angle2:', n_fn_angle)
 
@@ -258,9 +256,6 @@ if 1:
 
     if var_cos > 0.05:
         pcd2.colors[pick_idx] = [1, 0, 0]  # 选一个点
-        key_pts_buff_2.append(array(pcd2.points[pick_idx]))
-
-savetxt('save_file/key_pts_buff_2.txt', key_pts_buff_2)
 
 axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=8, origin=[0, 0, 0])
 
