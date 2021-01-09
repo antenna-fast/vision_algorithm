@@ -9,6 +9,8 @@ from dist import *  # 距离计算
 
 from scipy.spatial import Delaunay
 
+# TODO:将度量改成KL散度 + 方差
+
 # 加载 1
 pcd = o3d.io.read_point_cloud('../data_ply/Armadillo.ply')
 pcd = pcd.voxel_down_sample(voxel_size=3)
