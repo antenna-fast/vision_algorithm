@@ -5,7 +5,7 @@ from numpy.linalg import *
 # 欧式距离
 def get_oclide(vec1, vec2):
     dist = sum((vec1 - vec2)**2)
-    dist = sqrt(dist)
+    dist = sqrt(dist)  # 有时候简化
     return dist
 
 
@@ -31,6 +31,9 @@ def get_KL(vec1, vec2, vec_len):
         dist += vec1[i] * log2(vec1[i] / vec2[i])
     # dist = sum()
     return dist
+
+
+# 汉明距离
 
 
 if __name__ == '__main__':

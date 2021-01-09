@@ -106,7 +106,6 @@ def get_mesh(now_pt, vici_pts):
 
     plan_pts = []
     for pt in all_pts:  # 投影函数可以升级  向量化  # 中心点已经位于平面上 但是为了逻辑清晰 暂时不再优化
-    # for pt in vici_pts:  # 投影函数可以升级  向量化
         pt_temp = pt_to_plan(pt, p, normal)  # px p pn
         plan_pts.append(pt_temp)
 
@@ -176,7 +175,7 @@ for i in range(pts_num):
 
     now_pt_1 = array(pcd.points)[i]
     vici_pts_1 = array(pcd.points)[vici_idx_1]
-    all_pts = array(pcd.points)[idx_1]
+    # all_pts = array(pcd.points)[idx_1]
     mesh1, mesh_normals, vtx_normal = get_mesh(now_pt_1, vici_pts_1)
 
     # 构建一环的特征
@@ -199,7 +198,7 @@ for i in range(pts_num):
         [k, idx_1_2, _] = pcd_tree_1.search_knn_vector_3d(pcd.points[now_pt_2r], vici_num)
         vici_idx_1_2 = idx_1_2[1:]
         vici_pts_1_2 = array(pcd.points)[vici_idx_1_2]
-        all_pts = array(pcd.points)[idx_1_2]
+        # all_pts = array(pcd.points)[idx_1_2]
 
         mesh1, mesh_normals, vtx_normal = get_mesh(now_pt_1_2, vici_pts_1_2)
 
