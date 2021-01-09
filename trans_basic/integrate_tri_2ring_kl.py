@@ -12,7 +12,7 @@ from scipy.spatial import Delaunay
 
 # 加载 1
 pcd = o3d.io.read_point_cloud('../data_ply/Armadillo.ply')
-pcd = pcd.voxel_down_sample(voxel_size=5)
+pcd = pcd.voxel_down_sample(voxel_size=3)
 pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=8, max_nn=10))
 pcd.paint_uniform_color([0.0, 0.5, 0.1])
 # 构建搜索树
@@ -110,7 +110,7 @@ def get_mesh(now_pt, vici_pts):
     p = get_plan(normal, now_pt)
 
     # * 找到拓扑结构 START
-
+    all_pts = vstack((now_pt, vici_pts))
     # 将周围的点投影到平面
     plan_pts = []
     for pt in all_pts:  # 投影函数可以升级  向量化
@@ -161,7 +161,8 @@ def get_mesh(now_pt, vici_pts):
     return mesh, mesh_normals, normal
 
 
-vici_num = 9
+vici_num = 7
+cut_num = 5
 
 pts_num = len(pcd.points)
 
@@ -169,8 +170,8 @@ threshold = 1
 
 i = 150
 # 模型1
-# for i in range(pts_num):
-if 1:
+for i in range(pts_num):
+# if 1:
     # print("Paint the 1500th point red.")
     pick_idx = i
 
@@ -183,7 +184,7 @@ if 1:
 
     now_pt_1 = array(pcd.points)[i]
     vici_pts_1 = array(pcd.points)[vici_idx_1]
-    all_pts = array(pcd.points)[idx_1]
+    # all_pts = array(pcd.points)[idx_1]
     mesh1, mesh_normals, vtx_normal = get_mesh(now_pt_1, vici_pts_1)
 
     # 构建一环的特征
@@ -193,13 +194,13 @@ if 1:
         n_fn_angle_1.append(ang)
         # print(ang)
 
-    n_fn_angle_1 = sort(array(n_fn_angle_1))[:8]  # 规定长度
-    print(n_fn_angle_1)
+    n_fn_angle_1 = sort(array(n_fn_angle_1))[:cut_num]  # 规定长度
+    # print(n_fn_angle_1)
 
     # 二环
     var_buff = []
-
     n_fn_angle_buff_1 = []
+
     for now_pt_2r in vici_idx_1:  # 比较二环与中心环的区别
         now_pt_1_2 = array(pcd.points[now_pt_2r])  # 每一个邻域的相对中心点
 
@@ -218,28 +219,29 @@ if 1:
             n_fn_angle.append(ang)
             # print(ang)
 
-        print('angle:', n_fn_angle)
+        # print('angle:', n_fn_angle)
         n_fn_angle_buff_1.append(n_fn_angle)
 
     # print(n_fn_angle_buff_1)
     for vic_ang_1 in n_fn_angle_buff_1:
         # kl
-        vic_ang_1 = sort(vic_ang_1)[:8]  # 规定长度
-        kl_loss = get_KL(vic_ang_1, n_fn_angle_1, 8)  # vec1, vec2, vec_len
+        # print(len(vic_ang_1))
+        vic_ang_1 = sort(vic_ang_1)[:cut_num]  # 规定长度
+        kl_loss = get_KL(vic_ang_1, n_fn_angle_1, cut_num)  # vec1, vec2, vec_len
 
         # print(kl_loss)
         var_buff.append(kl_loss)
 
     var_buff = array(var_buff)
-
     sum_var = var(var_buff)
+
     if sum_var > threshold:
         pcd.colors[pick_idx] = [1, 0, 0]  # 选一个点
 
 
 # 变换后  模型2
-if 1:
-# for i in range(pts_num):
+# if 1:
+for i in range(pts_num):
 
     # print("Paint the 1500th point red.")
     pick_idx = i
@@ -263,8 +265,8 @@ if 1:
         n_fn_angle_2.append(ang)
         # print(ang)
 
-    n_fn_angle_2 = sort(array(n_fn_angle_2))[:8]  # 规定长度   先排序
-    print(n_fn_angle_2)
+    n_fn_angle_2 = sort(array(n_fn_angle_2))[:cut_num]  # 规定长度   先排序
+    # print(n_fn_angle_2)
 
     # 二环
     var_buff = []
@@ -291,8 +293,8 @@ if 1:
 
     for vic_ang_2 in n_fn_angle_buff_2:
         # kl
-        vic_ang_2 = sort(vic_ang_2)[:8]  # 规定长度
-        kl_loss = get_KL(vic_ang_2, n_fn_angle_2, 8)  # vec1, vec2, vec_len
+        vic_ang_2 = sort(vic_ang_2)[:cut_num]  # 规定长度
+        kl_loss = get_KL(vic_ang_2, n_fn_angle_2, cut_num)  # vec1, vec2, vec_len
 
         var_buff.append(kl_loss)
 

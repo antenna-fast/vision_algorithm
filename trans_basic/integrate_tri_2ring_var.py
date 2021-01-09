@@ -12,7 +12,7 @@ from scipy.spatial import Delaunay
 
 # 加载 1
 pcd = o3d.io.read_point_cloud('../data_ply/Armadillo.ply')
-pcd = pcd.voxel_down_sample(voxel_size=5)
+pcd = pcd.voxel_down_sample(voxel_size=3)
 pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=8, max_nn=10))
 pcd.paint_uniform_color([0.0, 0.5, 0.1])
 # 构建搜索树
@@ -217,9 +217,12 @@ for i in range(pts_num):
     for vic_ang_1 in n_fn_angle_buff_1:
         # kl
         vic_ang_1 = sort(vic_ang_1)[:8]  # 规定长度
-        kl_loss = get_KL(vic_ang_1, n_fn_angle_1, 8)  # vec1, vec2, vec_len
+        # kl_loss = get_KL(vic_ang_1, n_fn_angle_1, 8)  # vec1, vec2, vec_len
+        var_loss = var(vic_ang_1)  # vec1, vec2, vec_len
         # print(kl_loss)
-        var_buff.append(kl_loss)
+        var_buff.append(var_loss)
+
+    var_buff.append(var(n_fn_angle_1))
 
     var_buff = array(var_buff)
 
@@ -244,7 +247,6 @@ for i in range(pts_num):
 
     now_pt_2 = array(pcd2.points)[i]
     vici_pts_2 = array(pcd2.points)[vici_idx_2]
-    all_pts = array(pcd2.points)[idx_2]  # 不可以注释！！！
     mesh2, mesh_normals, vtx_normal = get_mesh(now_pt_2, vici_pts_2)
 
     # 构建一环的特征
@@ -252,7 +254,6 @@ for i in range(pts_num):
     for f_normal in mesh_normals:
         ang = get_cos_dist(f_normal, vtx_normal)  # 两个向量的余弦值
         n_fn_angle_2.append(ang)
-        # print(ang)
 
     n_fn_angle_2 = sort(array(n_fn_angle_2))[:8]  # 规定长度
     # print('n_fn_angle_2:', n_fn_angle_2)
@@ -268,7 +269,6 @@ for i in range(pts_num):
         [k, idx_2_2, _] = pcd_tree_2.search_knn_vector_3d(pcd2.points[now_pt_2r], vici_num)
         vici_idx_2_2 = idx_2_2[1:]
         vici_pts_2_2 = array(pcd2.points)[vici_idx_2_2]
-        vici_all = array(pcd2.points)[idx_2_2]
 
         mesh2, mesh_normals, vtx_normal = get_mesh(now_pt_2_2, vici_pts_2_2)
 
@@ -285,9 +285,11 @@ for i in range(pts_num):
     for vic_ang_2 in n_fn_angle_buff_2:
         # kl
         vic_ang_2 = sort(vic_ang_2)[:8]  # 规定长度
-        kl_loss = get_KL(vic_ang_2, n_fn_angle_2, 8)  # vec1, vec2, vec_len
-        # kl_loss = var(vic_ang_2-n_fn_angle_2)  # vec1, vec2, vec_len
+        # kl_loss = get_KL(vic_ang_2, n_fn_angle_2, 8)  # vec1, vec2, vec_len
+        kl_loss = var(vic_ang_2)  # vec1, vec2, vec_len
         var_buff.append(kl_loss)
+
+    var_buff.append(var(n_fn_angle_2))
 
     var_buff = array(var_buff)
     sum_var = var(var_buff)
@@ -304,7 +306,7 @@ o3d.visualization.draw_geometries([pcd,
                                    # mesh1,
                                    # mesh2
                                    ],
-                                  window_name='ANTenna3D',
+                                  window_name='ANTenna3D_Var',
                                   # zoom=0.3412,
                                   # front=[0.4257, -0.2125, -0.8795],
                                   # lookat=[2.6172, 2.0475, 1.532],
