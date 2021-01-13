@@ -45,22 +45,28 @@ def get_ppf(pt1, pt2, n1, n2):
 # c = np.cross(a, b)
 # print(c)
 
+train = 0
 
 if __name__ == '__main__':
     # 加载数据
+    # 模型
     pcd = o3d.io.read_point_cloud('../data_ply/Armadillo.ply')
     # pcd = o3d.io.read_point_cloud('data_ply/dragon_vrip.ply')
     pcd.paint_uniform_color([0.0, 0.5, 0.5])
 
     axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=15, origin=[0, 0, 0])
     # print("Downsample the point cloud with a voxel of 0.05")
-    pcd = pcd.voxel_down_sample(voxel_size=5)
+    pcd = pcd.voxel_down_sample(voxel_size=10)
     # print("Recompute the normal of the downsampled point cloud")
     pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=8, max_nn=10))
 
-    pcd_pt = array(pcd.points)
-    pcd_norm = array(pcd.normals)
+    pcd_np = array(pcd.points)
+    pcd_normal = array(pcd.normals)
 
+    pts_num = len(pcd_np)  # 模型的点数
+
+
+    # 制作场景
     pcd_trans = array(pcd.points)  # nx3
     # pcd_trans = dot(r_mat, pcd_trans.T).T
     pcd_trans = pcd_trans + array([130, 0, 0])
@@ -73,9 +79,6 @@ if __name__ == '__main__':
     pcd2.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=8, max_nn=10))
     pcd2.paint_uniform_color([0.0, 0.8, 0.5])
 
-    pcd_trans_normal = array(pcd2.normals)
-
-    pts_num = len(pcd_trans)
     # 以索引进行保存
 
     # 从构建pcd1 线下构建
@@ -91,63 +94,72 @@ if __name__ == '__main__':
     d_step = 5
     a_step = 10
 
-    # 建立哈系表
-    hash_table = {}
+    if train:
+        # 建立哈系表
+        hash_table = {}
 
-    for i in range(pts_num):
+        for i in range(pts_num):  # 视为模型上的参考点
+            pt_i = pcd_np[i]
+            pt_i_n = pcd_normal[i]
+            for j in range(pts_num):  # 
+                if j != i:  # 不同的点之间比较
+                    pt_j = pcd_np[j]
+                    pt_j_n = pcd_normal[j]
 
-        pt_i = pcd_pt[i]
-        pt_i_n = pcd_norm[i]
-        for j in range(pts_num):
-            if j != i:  # 不同的点之间比较
-                pt_j = pcd_trans[j]
-                pt_j_n = pcd_trans_normal[j]
+                    # print('n: {0}  {1}'.format(pt_i_n, pt_j_n))
+                    # 计算<mi, mj>的PPF
+                    ppf_vec = get_ppf(pt_i, pt_j, pt_i_n, pt_j_n)  # pt1, pt2, n1, n2
 
-                # print('n: {0}  {1}'.format(pt_i_n, pt_j_n))
-                # 计算<mi, mj>的PPF
+                    # 特征离散化
+                    ppf_vec[0] = (ppf_vec[0] / d_step).astype(int)
+                    ppf_vec[1:] = (ppf_vec[1:] / a_step).astype(int)
 
-                ppf_vec = get_ppf(pt_i, pt_j, pt_i_n, pt_j_n)  # pt1, pt2, n1, n2
+                    # print(ppf_vec)
+                    key_temp = str(ppf_vec)
+                    value_temp = [i, j]
 
-                # 特征离散化
-                ppf_vec[0] = (ppf_vec[0] / d_step).astype(int)
-                ppf_vec[1:] = (ppf_vec[1:] / a_step).astype(int)
+                    # 将特征push到hash
+                    if key_temp in hash_table.keys():
+                        # print('已经存在')
+                        hash_table[key_temp].append(value_temp)
+                    else:
+                        # print('尚不存在，需要新建')
+                        hash_table[key_temp] = value_temp
 
-                # print(ppf_vec)
-                key_temp = str(ppf_vec)
-                value_temp = [i, j]
+            print(i / pts_num)  # 进度
 
-                # 将特征push到hash
-                if key_temp in hash_table.keys():
-                    # print('已经存在')
-                    hash_table[key_temp].append(value_temp)
-                else:
-                    # print('尚不存在，需要新建')
-                    hash_table[key_temp] = value_temp
+        print(hash_table)
+        save('hash_table.npy', hash_table)
 
-        print(i / pts_num)  # 进度
-
-    print(hash_table)
-    savetxt('hash_table.txt', hash_table)
-
-    # 以pcd2作为场景 线上
+    # 以pcd2作为场景 线上匹配
     # 先选定一系列参考点
     # 其他所有的点和参考点 进行计算点对特征
     # 这些特征与模型的全局描述进行匹配？ 每一个潜在的匹配 投票位姿（相对于参考点）
-    #
+
+    # 加载hash table
+    hash_table = load('hash_table.npy', allow_pickle=True).item()
+    # print(hash_table)
+    print(hash_table)
 
     # 场景中的所有点
-    scene_pts = len(array(pcd2.points))
-    num_scene_pts = len(array(pcd2.points))
+    scene_pts = array(pcd2.points)
+    scene_pts_n = array(pcd2.normals)
+    num_scene_pts = len(scene_pts)
 
     # 首先对场景进行采样，得到参考点
     pcd2_r = pcd2.voxel_down_sample(voxel_size=10)
+    pcd2_r.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=11, max_nn=10))
+
     scene_pts_r = array(pcd2_r.points)
+    scene_pts_r_n = array(pcd2_r.normals)
     num_pts_scene_r = len(scene_pts_r)
 
     for i in range(num_pts_scene_r):  # 参考点对其他所有点的特征
         pt_i = scene_pts_r[i]  # 参考点
+        pt_i_n = scene_pts_r_n[i]
         for j in range(num_scene_pts):
             pt_j = scene_pts[j]
+            pt_j_n = scene_pts_n[i]
             ppf_vec = get_ppf(pt_i, pt_j, pt_i_n, pt_j_n)  # pt1, pt2, n1, n2
 
             # 特征离散化
@@ -156,6 +168,20 @@ if __name__ == '__main__':
 
             # 通过查找哈希表得到 <mr, mi>，然后把<sr, si>和<mr, mi>统一到同一个坐标系 得到Tmg Tsg
             # 以及Alpha  （mi与si之间的夹角）
+
+            # print(ppf_vec)
+            key_temp = str(ppf_vec)
+            value_temp = [i, j]
+
+            # 将特征push到hash
+            if key_temp in hash_table.keys():
+                print('已经存在')  # 取出并进行匹配投票
+
+                # hash_table[key_temp].append(value_temp)
+
+            # else:
+            #     print('尚不存在，需要新建')
+            #     hash_table[key_temp] = value_temp
 
     o3d.visualization.draw_geometries([pcd,
                                        pcd2,
