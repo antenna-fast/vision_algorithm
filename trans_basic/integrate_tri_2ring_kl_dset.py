@@ -83,11 +83,10 @@ else:
 
 pcd2 = o3d.geometry.PointCloud()
 pcd2.points = o3d.utility.Vector3dVector(pcd_trans)
+pcd2.paint_uniform_color([0.0, 0.5, 0.1])
 
 # print("Recompute the normal of the downsampled point cloud")
 pcd2.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=search_radius, max_nn=search_max_nn))
-pcd2.paint_uniform_color([0.0, 0.5, 0.1])
-
 pcd_tree_2 = o3d.geometry.KDTreeFlann(pcd2)  # 构建搜索树
 
 print('pcd1_num:', len(pcd.points))
@@ -160,8 +159,12 @@ def get_mesh(now_pt, vici_pts):
     return mesh, mesh_normals, normal
 
 
-vici_num = 7
-cut_num = 5
+# 邻域点个数
+vici_num_1 = 7
+vici_num_2 = 8  # 稀疏的点使用更大的邻域？  自适应：基于密度  选取半径内的点，计算点的个数
+# 排序后截取的个数
+cut_num_1 = 5
+cut_num_2 = 4
 
 pts_num_m = len(pcd.points)
 pts_num_s = len(pcd2.points)
@@ -178,7 +181,7 @@ for i in range(pts_num_m):
 
     # 一环上构造一个 特征向量
     # print("Find its nearest neighbors, and paint them blue.")
-    [k, idx_1, _] = pcd_tree_1.search_knn_vector_3d(pcd.points[pick_idx], vici_num)
+    [k, idx_1, _] = pcd_tree_1.search_knn_vector_3d(pcd.points[pick_idx], vici_num_1)
     vici_idx_1 = idx_1[1:]
     # asarray(pcd.colors)[vici_idx_1, :] = [0, 0, 1]
 
@@ -194,7 +197,7 @@ for i in range(pts_num_m):
         n_fn_angle_1.append(ang)
         # print(ang)
 
-    n_fn_angle_1 = sort(array(n_fn_angle_1))[:cut_num]  # 规定长度
+    n_fn_angle_1 = sort(array(n_fn_angle_1))[:cut_num_1]  # 规定长度
     # print(n_fn_angle_1)
 
     # 二环
@@ -205,7 +208,7 @@ for i in range(pts_num_m):
         now_pt_1_2 = array(pcd.points[now_pt_2r])  # 每一个邻域的相对中心点
 
         # 搜索二环 邻域
-        [k, idx_1_2, _] = pcd_tree_1.search_knn_vector_3d(pcd.points[now_pt_2r], vici_num)
+        [k, idx_1_2, _] = pcd_tree_1.search_knn_vector_3d(pcd.points[now_pt_2r], vici_num_1)
         vici_idx_1_2 = idx_1_2[1:]
         vici_pts_1_2 = array(pcd.points)[vici_idx_1_2]
         all_pts = array(pcd.points)[idx_1_2]
@@ -226,8 +229,8 @@ for i in range(pts_num_m):
     for vic_ang_1 in n_fn_angle_buff_1:
         # kl
         # print(len(vic_ang_1))
-        vic_ang_1 = sort(vic_ang_1)[:cut_num]  # 规定长度
-        kl_loss = get_KL(vic_ang_1, n_fn_angle_1, cut_num)  # vec1, vec2, vec_len
+        vic_ang_1 = sort(vic_ang_1)[:cut_num_1]  # 规定长度
+        kl_loss = get_KL(vic_ang_1, n_fn_angle_1, cut_num_1)  # vec1, vec2, vec_len
 
         # print(kl_loss)
         var_buff.append(kl_loss)
@@ -250,7 +253,7 @@ for i in range(pts_num_s):
 
     # 一环上构造一个 特征向量
     # print("Find its nearest neighbors, and paint them blue.")
-    [k, idx_2, _] = pcd_tree_2.search_knn_vector_3d(pcd2.points[pick_idx], vici_num)
+    [k, idx_2, _] = pcd_tree_2.search_knn_vector_3d(pcd2.points[pick_idx], vici_num_2)
     vici_idx_2 = idx_2[1:]
     # asarray(pcd.colors)[vici_idx_2, :] = [0, 0, 1]
 
@@ -265,7 +268,7 @@ for i in range(pts_num_s):
         ang = get_cos_dist(f_normal, vtx_normal)  # 两个向量的余弦值
         n_fn_angle_2.append(ang)
 
-    n_fn_angle_2 = sort(array(n_fn_angle_2))[:cut_num]  # 规定长度   先排序
+    n_fn_angle_2 = sort(array(n_fn_angle_2))[:cut_num_2]  # 规定长度   先排序
     # print(n_fn_angle_2)
 
     # 二环
@@ -276,7 +279,7 @@ for i in range(pts_num_s):
         now_pt_2_2 = array(pcd2.points[now_pt_2r])  # 每一个邻域的相对中心点
 
         # 搜索二环 邻域
-        [k, idx_2_2, _] = pcd_tree_2.search_knn_vector_3d(pcd2.points[now_pt_2r], vici_num)
+        [k, idx_2_2, _] = pcd_tree_2.search_knn_vector_3d(pcd2.points[now_pt_2r], vici_num_2)
         vici_idx_2_2 = idx_2_2[1:]
         vici_pts_2_2 = array(pcd2.points)[vici_idx_2_2]
 
@@ -293,8 +296,8 @@ for i in range(pts_num_s):
 
     for vic_ang_2 in n_fn_angle_buff_2:
         # kl
-        vic_ang_2 = sort(vic_ang_2)[:cut_num]  # 规定长度
-        kl_loss = get_KL(vic_ang_2, n_fn_angle_2, cut_num)  # vec1, vec2, vec_len
+        vic_ang_2 = sort(vic_ang_2)[:cut_num_2]  # 规定长度
+        kl_loss = get_KL(vic_ang_2, n_fn_angle_2, cut_num_2)  # vec1, vec2, vec_len
 
         var_buff.append(kl_loss)
 
