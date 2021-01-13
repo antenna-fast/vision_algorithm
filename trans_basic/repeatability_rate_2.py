@@ -9,6 +9,7 @@ from dist import *  # 距离计算
 
 from scipy.spatial import Delaunay
 
+# 关键点用来评估检测算法对变换的鲁棒性
 
 # 给定两个检测出来的关键点，在经过变换之后，看第二个检测出来的是不是在邻域范围之内
 # 如果是，就认为是重合的
@@ -20,6 +21,9 @@ from scipy.spatial import Delaunay
 
 # 对于索引有改变的情况
 # 执行思路:对每个关键点与场景中的点求最短距离 看最短距离是否小于阈值
+
+# rep(X,Y)  如果Y中检测到X中也有的关键点
+# (rep(X,Y) + ep(Y,X)) / 2
 
 # 加载 1
 pcd = o3d.io.read_point_cloud('../data_ply/Armadillo.ply')
@@ -202,16 +206,16 @@ if __name__ == '__main__':
 
     axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=8, origin=[0, 0, 0])
 
-    o3d.visualization.draw_geometries([pcd,
-                                       pcd2,
-                                       axis_pcd,
-                                       # mesh1,
-                                       # mesh2
-                                       ],
-                                      window_name='ANTenna3D',
-                                      # zoom=0.3412,
-                                      # front=[0.4257, -0.2125, -0.8795],
-                                      # lookat=[2.6172, 2.0475, 1.532],
-                                      # up=[-0.0694, -0.9768, 0.2024]
-                                      # point_show_normal=True
-                                      )
+    # o3d.visualization.draw_geometries([pcd,
+    #                                    pcd2,
+    #                                    axis_pcd,
+    #                                    # mesh1,
+    #                                    # mesh2
+    #                                    ],
+    #                                   window_name='ANTenna3D',
+    #                                   # zoom=0.3412,
+    #                                   # front=[0.4257, -0.2125, -0.8795],
+    #                                   # lookat=[2.6172, 2.0475, 1.532],
+    #                                   # up=[-0.0694, -0.9768, 0.2024]
+    #                                   # point_show_normal=True
+    #                                   )

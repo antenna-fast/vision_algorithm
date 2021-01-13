@@ -35,11 +35,11 @@ pcd_trans = pcd_trans + t_vect
 
 noise_mode = 2  # 0 for vstack and 1 for jatter
 
-noise_rate = 0.01  # 噪声占比
+noise_rate = 0.07  # 噪声占比
 
-mean = array([0, 0, 0])
 
 if noise_mode == 0:
+    mean = array([0, 0, 0])
     cov = eye(3) * 1000
     # cov = eye(3)*diameter  # 直径的多少倍率
 
@@ -48,8 +48,11 @@ if noise_mode == 0:
     noise = random.multivariate_normal(mean, cov, noise_pts_num)
     # 对噪声变换到场景坐标系
     noise_trans = dot(r_mat, noise.T).T + t_vect
+    # 方式1 将噪声塞进去
+    pcd_trans = vstack((pcd_trans, noise_trans))
 
 if noise_mode == 1:
+    mean = array([0, 0, 0])
     cov = eye(3)   # 直径的多少倍率
 
     pts_num = len(pcd_trans)
@@ -60,11 +63,6 @@ if noise_mode == 1:
     # 对噪声变换到场景坐标系
     noise_trans = dot(r_mat, noise.T).T + t_vect
 
-if noise_mode == 0:
-    # 方式1 将噪声塞进去
-    pcd_trans = vstack((pcd_trans, noise_trans))
-
-if noise_mode == 1:
     # 方式2 对模型点跳动
     # 第二种 不改变点的整体数量,直接对采样的点添加
     rand_choose = np.random.randint(0, pts_num, noise_pts_num)
@@ -170,6 +168,7 @@ threshold = 1
 
 i = 150
 # 模型1
+key_pts_buff_1 = []
 for i in range(pts_num):
 # if 1:
     # print("Paint the 1500th point red.")
@@ -237,10 +236,13 @@ for i in range(pts_num):
 
     if sum_var > threshold:
         pcd.colors[pick_idx] = [1, 0, 0]  # 选一个点
+        key_pts_buff_1.append(now_pt_1)
 
+savetxt('save_file/key_pts_buff_1_' + str(noise_rate) + '.txt', key_pts_buff_1)
 
 # 变换后  模型2
 # if 1:
+key_pts_buff_2 = []
 for i in range(pts_num):
 
     # print("Paint the 1500th point red.")
@@ -304,6 +306,9 @@ for i in range(pts_num):
 
     if sum_var > threshold:
         pcd2.colors[pick_idx] = [1, 0, 0]  # 选一个点
+        key_pts_buff_2.append(now_pt_2)
+key_pts_buff_2 = array(key_pts_buff_2)
+savetxt('save_file/key_pts_buff_2_' + str(noise_rate) + '.txt', key_pts_buff_2)
 
 axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=8, origin=[0, 0, 0])
 

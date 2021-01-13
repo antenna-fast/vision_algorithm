@@ -131,7 +131,9 @@ if __name__ == '__main__':
     # 基于索引,然后查找最近点,如果距离小于某个数值就算重合
 
     # 噪声占比
-    noise_rate_list = [0.0, 0.01, 0.03, 0.05, 0.07, 0.1]
+    # noise_rate_list = [0.0, 0.01, 0.03, 0.05, 0.07, 0.1, 0.13, 0.15, 0.17]
+    noise_rate_list = arange(0.1, 0.37, 0.03)
+    print(noise_rate_list)
     # noise_rate_list = [0.1]
     scale_ratio = 1  # 尺度因子
 

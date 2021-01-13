@@ -18,11 +18,9 @@ b_norm = array([0, 1, 0])
 
 
 # 计算夹角  注意 这个会导致不稳定，opencv建议使用 arctan！
-# 原理：向量内积的几何意义：向量a在b上的投影   返回弧度制夹角
+# 原理：向量内积的几何意义：向量a在b上的投影
 def get_ang(vec_1, vec_2):
     theta = arccos(dot(vec_1, vec_2) / (norm(vec_1) * norm(vec_2))) * 180 / pi
-    # 角度制
-    # theta = theta
     return theta
 
 

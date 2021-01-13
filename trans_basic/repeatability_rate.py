@@ -185,6 +185,8 @@ if __name__ == '__main__':
     # 加载保存的关键点
     key_pts_buff_1 = loadtxt('save_file/key_pts_buff_1.txt')
     key_pts_buff_2 = loadtxt('save_file/key_pts_buff_2.txt')
+    print(key_pts_buff_1)
+    print(key_pts_buff_2)
 
     # 对第一个变换
 

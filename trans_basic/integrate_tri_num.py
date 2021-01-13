@@ -44,9 +44,8 @@ noise_mode = 2  # 0 for vstack and 1 for jitter
 
 noise_rate = 0.1  # 噪声占比
 
-mean = array([1, 0, 1])
-
 if noise_mode == 0:
+    mean = array([1, 0, 1])
     cov = eye(3) * 1000
     # cov = eye(3)*diameter  # 直径的多少倍率
 
@@ -57,8 +56,12 @@ if noise_mode == 0:
     # 对噪声变换到场景坐标系
 
     noise_trans = dot(r_mat, noise.T).T + t_vect
+    # 方式1 将噪声塞进去
+    pcd_trans = vstack((pcd_trans, noise_trans))
+
 
 if noise_mode == 1:
+    mean = array([1, 0, 1])
     cov = eye(3)   # 直径的多少倍率
 
     pts_num = len(pcd_trans)
@@ -70,11 +73,6 @@ if noise_mode == 1:
 
     noise_trans = dot(r_mat, noise.T).T + t_vect
 
-if noise_mode == 0:
-    # 方式1 将噪声塞进去
-    pcd_trans = vstack((pcd_trans, noise_trans))
-
-if noise_mode == 1:
     # 方式2 对模型点跳动
     # 第二种 不改变点的整体数量,直接对采样的点添加
     rand_choose = np.random.randint(0, pts_num, noise_pts_num)
@@ -176,8 +174,8 @@ i = 150
 # 模型1
 key_pts_buff_1 = []
 
-# for i in range(pts_num):
-if 1:
+for i in range(pts_num):
+# if 1:
     # print("Paint the 1500th point red.")
     pick_idx = i
     now_pt_1 = array(pcd.points[pick_idx])
@@ -203,7 +201,7 @@ if 1:
         n_fn_angle.append(ang)
         # print(ang)
 
-    print('angle:', n_fn_angle)
+    # print('angle:', n_fn_angle)
 
     # 计算mesh法向量的离散程度   # 统计余弦值的方差
     var_cos = var(n_fn_angle, axis=0)
@@ -221,8 +219,8 @@ pts_num_2 = len(pcd2.points)
 
 # 变换后
 key_pts_buff_2 = []
-# for i in range(pts_num_2):
-if 1:
+for i in range(pts_num_2):
+# if 1:
     # print("Paint the 1500th point red.")
     pick_idx = i
     now_pt_2 = array(pcd2.points[pick_idx])
@@ -250,7 +248,7 @@ if 1:
         ang = get_cos_dist(f_normal, vtx_normal2)
         n_fn_angle.append(ang)
 
-    print('angle2:', n_fn_angle)
+    # print('angle2:', n_fn_angle)
 
     # 计算mesh法向量的离散程度   # 统计余弦值的方差
     var_cos = var(n_fn_angle, axis=0)

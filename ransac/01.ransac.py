@@ -64,7 +64,7 @@ if __name__ == '__main__':
 
     data_len = len(pts)
     model_buff = []  # 保存k, b, dist
-    sample_num = 100  # over all sample time
+    sample_num = 50  # over all sample time
 
     while sample_num > 0:
         sample_num -= 1
@@ -87,7 +87,7 @@ if __name__ == '__main__':
             dist += get_pt2line_dist(pt, k, b)
             # print('dist:', dist)
 
-        print('model score:', dist)
+        # print('model score:', dist)
 
         model_buff.append([k, b, dist])
 

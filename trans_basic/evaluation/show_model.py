@@ -3,7 +3,8 @@ import open3d as o3d
 
 # 测试数据读取
 
-f = open('shrec_training/0002.holes.1.off')
+# f = open('D:/数据集/shrec_training/0002.holes.1.off')
+f = open('D:/数据集/shrec_training/0002.microholes.1.off')
 # print(f.readlines())
 
 for i in range(2):

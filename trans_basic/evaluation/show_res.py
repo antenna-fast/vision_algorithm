@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 
 if __name__ == '__main__':
 
-    x = array([0, 0.01, 0.03, 0.05, 0.07, 0.10])
+    x = array([0, 0.01, 0.03, 0.05, 0.07, 0.10, 0.13, 0.15, 0.17])
     # y = array()
     y = loadtxt('../save_file/repeat_buff.txt')
 
@@ -22,5 +22,9 @@ if __name__ == '__main__':
     ax.set_ylabel('Repeatability', font1)  # Add a y-label to the axes.
     # ax.set_title("Repeatability")  # Add a title to the axes.  # 标题
     ax.legend()  # Add a legend.
+
+    for y in arange(0, 1.1, 0.1):
+        # y, xmin, xmax, colors=None, linestyles='solid', label=''
+        plt.hlines(y, 0, 0.2, colors="gray", linestyles="dashed")
 
     plt.show()
