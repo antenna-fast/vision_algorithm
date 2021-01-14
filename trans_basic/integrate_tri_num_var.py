@@ -2,10 +2,8 @@ import open3d as o3d
 
 from module_test.point_to_plan_test import pt_to_plan  # px, p, p_n  返回投影后的三维点
 from base_trans import *
-from n_pt_plan import *
 from dist import *  # 距离计算
-
-from scipy.spatial import Delaunay
+from o3d_impl import *
 
 # TODO:将度量改成KL散度 + 方差
 
