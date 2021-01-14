@@ -1,6 +1,9 @@
 from numpy import *
 import matplotlib.pyplot as plt
 
+from point_project import *
+
+
 p = array([1, 1, 1, 1])
 p_n = p[:3]
 
@@ -15,18 +18,6 @@ pts_buff = array(pts_buff)
 
 # 被投影点
 a = array([-5, 5, 5]).astype(int)
-
-
-# 输入:点 平面 平面法向量
-# 输出:投影点
-def pt_to_plan(a, p, p_n):
-    # 参数t
-    t = -1 * (p[0] * a[0] + p[1] * a[1] + p[2] * a[2] + p[3]) / (p[0] * p_n[0] + p[1] * p_n[1] + p[2] * p_n[2])
-    # print(t)
-
-    x = a + t * p_n
-
-    return x
 
 
 if __name__ == '__main__':

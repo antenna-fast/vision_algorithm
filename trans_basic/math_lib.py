@@ -32,10 +32,5 @@ var_a = get_var(a)
 # print(var_a)
 
 
-def get_cos_dist():
-
-    return 0
-
-
 a = array([1, 1, 2])
 print(var(a, axis=0))

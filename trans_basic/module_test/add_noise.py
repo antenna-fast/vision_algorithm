@@ -1,17 +1,10 @@
-from numpy import *
-from numpy.linalg import *
 import open3d as o3d
 
-from point_to_plan import pt_to_plan  # px, p, p_n  返回投影后的三维点
-from 正交基变换 import *
-from n_pt_plan import *
+from base_trans import *
 from dist import *  # 距离计算
 
-from scipy.spatial import Delaunay
-
-
 # 加载 1
-pcd = o3d.io.read_point_cloud('../data_ply/Armadillo.ply')
+pcd = o3d.io.read_point_cloud('../../data_ply/Armadillo.ply')
 pcd = pcd.voxel_down_sample(voxel_size=2)
 pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=8, max_nn=10))
 pcd.paint_uniform_color([0.0, 0.6, 0.1])
@@ -42,7 +35,6 @@ noise = random.multivariate_normal(mean, cov, noise_pts_num)
 # print('noise.shape:', noise.shape)
 
 # 对噪声变换到场景坐标系
-
 noise_trans = dot(r_mat, noise.T).T + t_vect
 
 # 方式1 将噪声塞进去
