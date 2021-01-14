@@ -32,3 +32,9 @@ if __name__ == '__main__':
 
     else:
         print('没有这个索引')
+
+    # 保存
+    save('test.npy', hash_table)
+
+    h = load('test.npy', allow_pickle=True)
+    print('h:\n', h)

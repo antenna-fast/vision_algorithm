@@ -25,7 +25,7 @@ def get_integral(img):
             I[i][j] = img[i][j] + I[i][j - 1] + I[i - 1][j] - I[i - 1][j - 1]
         # print(I[i][j])
 
-    print(I)
+    # print(I)
 
     return I
 
