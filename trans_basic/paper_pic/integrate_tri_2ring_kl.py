@@ -1,8 +1,10 @@
 from dist import *  # 距离计算
 from o3d_impl import *
 
+# TODO: 为了可视化
+
 # 加载 1
-pcd = o3d.io.read_point_cloud('../data_ply/Armadillo.ply')
+pcd = o3d.io.read_point_cloud('../../data_ply/Armadillo.ply')
 pcd = pcd.voxel_down_sample(voxel_size=3)
 pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=8, max_nn=10))
 pcd.paint_uniform_color([0.0, 0.5, 0.1])
@@ -132,6 +134,11 @@ for i in range(pts_num):
     now_pt_1 = array(pcd.points)[i]
     vici_pts_1 = array(pcd.points)[vici_idx_1]
     # all_pts = array(pcd.points)[idx_1]
+
+    # 保存需要的点
+    savetxt('../save_file/now_pts_pic.txt', now_pt_1)
+    savetxt('../save_file/vic_pts_pic.txt', vici_pts_1)
+
     mesh1, mesh_normals, vtx_normal = get_mesh(now_pt_1, vici_pts_1)
 
     # 构建一环的特征
