@@ -2,19 +2,24 @@ from numpy import *
 from numpy.linalg import *
 import open3d as o3d
 
-from point_to_plan import pt_to_plan  # px, p, p_n  返回投影后的三维点
-from 正交基变换 import *
+from o3d_impl import *
+from base_trans import *
 from n_pt_plan import *
 from dist import *  # 距离计算
 
 from scipy.spatial import Delaunay
+
+
+# 将点云转换成mesh
+# 思路：保存顶点和三角拓扑
+
 
 # 加载 1
 model_path = '../../data_ply/bun_zipper.ply'
 
 # pcd = o3d.io.read_point_cloud('../data_ply/Armadillo.ply')
 pcd = o3d.io.read_point_cloud(model_path)
-pcd = pcd.voxel_down_sample(voxel_size=0.01)
+pcd = pcd.voxel_down_sample(voxel_size=0.005)
 pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.05, max_nn=10))
 pcd.paint_uniform_color([0.0, 0.5, 0.1])
 # 构建搜索树
@@ -107,80 +112,22 @@ pcd_tree_2 = o3d.geometry.KDTreeFlann(pcd2)
 histo = {}
 
 
-def get_mesh(now_pt, vici_pts):
-    # 对每个邻域:
-    # 得到邻域局部坐标系 得到法向量等等
-    coord = get_coord(now_pt, vici_pts)  # 列向量表示三个轴
-    normal = coord[:, 2]  # 第三列
-    # print('coord:\n', coord)
-
-    # 还有一步 利用法向量和中心点,得到平面方程[ABCD]
-    p = get_plan(normal, now_pt)
-
-    # * 找到拓扑结构 START
-    all_pts = vstack((now_pt, vici_pts))
-    # 将周围的点投影到平面
-    plan_pts = []
-    for pt in all_pts:  # 投影函数可以升级  向量化
-        pt_temp = pt_to_plan(pt, p, normal)  # px p pn
-        plan_pts.append(pt_temp)
-
-    plan_pts = array(plan_pts)  # 投影到平面的点
-
-    # 将投影后的点旋转至z轴,得到投影后的二维点
-    coord_inv = inv(coord)  # 反变换
-    # rota_pts = dot(coord_inv, all_pts.T).T  # 将平面旋转到与z平行
-    # 首先要将平面上的点平移到原点 然后再旋转  其实不平移也是可以的，只要xy平面上的结构不变
-
-    rota_pts = dot(coord_inv, plan_pts.T).T  # 将平面旋转到与z平行
-
-    # rota_pts[:, 2] = 0  # 已经投影到xoy(最大平面),在此消除z向轻微抖动
-    pts_2d = rota_pts[:, 0:2]
-
-    # Delauney三角化
-    tri = Delaunay(pts_2d)
-    tri_idx = tri.simplices  # 三角形索引
-    # print(tri_idx)
-
-    # 统计三角形的数量
-    # tri_num = len(tri_idx)
-    # print(tri_num)
-
-    # if tri_num in histo.keys():
-    #     histo[tri_num] += 1
-    # else:
-    #     histo[tri_num] = 1
-
-    # 可视化二维的投影
-    # plt.triplot(pts_2d[:, 0], pts_2d[:, 1], tri.simplices.copy())
-    # plt.plot(pts_2d[:, 0], pts_2d[:, 1], 'o')
-    # plt.show()
-
-    # 根据顶点和三角形索引创建mesh
-    mesh = get_non_manifold_vertex_mesh(all_pts, tri_idx)
-
-    # * 找到拓扑结构 END
-
-    # 求mesh normal
-    mesh.compute_triangle_normals()
-    mesh_normals = array(mesh.triangle_normals)
-    # print(mesh_normals)
-
-    return mesh, mesh_normals, normal
-
-
 vici_num = 7
 cut_num = 5
 
 pts_num = len(pcd.points)
 
-threshold = 1
+threshold = 0.7
 
-# i = 150
+i = 150
 # 模型1
 key_pts_buff_1 = []
+
+vtx_buff = []
+tri_idx_buff = []
+
 for i in range(pts_num):
-    # if 1:
+# if 1:
     # print("Paint the 1500th point red.")
     pick_idx = i
 
@@ -189,11 +136,26 @@ for i in range(pts_num):
     # print("Find its nearest neighbors, and paint them blue.")
     [k, idx_1, _] = pcd_tree_1.search_knn_vector_3d(pcd.points[pick_idx], vici_num)
     vici_idx_1 = idx_1[1:]
-    # asarray(pcd.colors)[vici_idx_1, :] = [0, 0, 1]
 
     now_pt_1 = array(pcd.points)[i]
     vici_pts_1 = array(pcd.points)[vici_idx_1]
     # all_pts = array(pcd.points)[idx_1]
+    # print(now_pt_1)
+
+    # 添加前已有的顶点
+    vtx_num_before = len(vtx_buff)
+
+    vtx_pts, tri_idx = get_mesh_idx(now_pt_1, vici_pts_1)
+    # 定点数不一定对应了确定的三角形数
+    for t in vtx_pts:
+        vtx_buff.append(t)  # 每个元素是一个顶点  # 问题 并不一定能对应上!  索引里面都是局部的,要想构建全局的...
+
+    for v in tri_idx:  # 顶点如何处理
+        tri_idx_buff.append(v+vtx_num_before)  # 每个元素代表一个三角形
+
+    # print(vtx_buff)
+    # print(tri_idx)
+
     mesh1, mesh_normals, vtx_normal = get_mesh(now_pt_1, vici_pts_1)
 
     # 构建一环的特征
@@ -248,13 +210,36 @@ for i in range(pts_num):
         pcd.colors[pick_idx] = [1, 0, 0]  # 选一个点
         key_pts_buff_1.append(now_pt_1)
 
-if noise_mode == 0 or noise_mode == 1:
-    savetxt('../save_file/key_pts_buff_1_' + str(noise_rate) + '.txt', key_pts_buff_1)
+# if noise_mode == 0 or noise_mode == 1:
+#     savetxt('../save_file/key_pts_buff_1_' + str(noise_rate) + '.txt', key_pts_buff_1)
+
+
+vtx_buff = array(vtx_buff)
+tri_idx_buff = array(tri_idx_buff)
+
+print('vtx_buff shape:', vtx_buff.shape)
+print('tri_idx_buff shape:', tri_idx_buff.shape)
+
+mesh = get_non_manifold_vertex_mesh(vtx_buff, tri_idx_buff)
+
+
+o3d.visualization.draw_geometries([
+    # pcd,
+    #                                pcd2,
+    #                                axis_pcd,
+                                   mesh
+                                   # mesh1,
+                                   # mesh2
+                                   ],
+                                  window_name='ANTenna3D',
+                                  )
+
 
 # 变换后  模型2
-# if 1:
 key_pts_buff_2 = []
-for i in range(pts_num):
+
+if 1:
+# for i in range(pts_num):
 
     # print("Paint the 1500th point red.")
     pick_idx = i
@@ -326,8 +311,9 @@ if noise_mode == 0 or noise_mode == 1:
 axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.1, origin=[0, 0, 0])
 
 o3d.visualization.draw_geometries([pcd,
-                                   pcd2,
+                                   # pcd2,
                                    axis_pcd,
+                                   mesh
                                    # mesh1,
                                    # mesh2
                                    ],

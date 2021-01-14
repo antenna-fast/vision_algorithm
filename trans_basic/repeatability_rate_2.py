@@ -2,9 +2,7 @@ from numpy import *
 from numpy.linalg import *
 import open3d as o3d
 
-from point_to_plan import pt_to_plan  # px, p, p_n  返回投影后的三维点
-from 正交基变换 import *
-from n_pt_plan import *
+from base_trans import *
 from dist import *  # 距离计算
 
 from scipy.spatial import Delaunay
@@ -155,23 +153,20 @@ def get_repeate_rate_2(pcd_np_1, pcd_np_2, r_mat, t_vect):
 
 # 准确率
 # 预测正确的结果所占的比例  TP+TN/TP+TN+FP+FN
-def get_accuracy():
-
-    return 0
+def get_accuracy(TP, FP, TN, FN):
+    return (TP+TN)/(TP+TN+FP+FN)
 
 
 # 精确率
 # 所有被识别为正类别的样本中，真正为正样本的比例  TP/TP+FP
-def get_precision():
-
-    return 0
+def get_precision(TP, FP):
+    return TP / (TP + FP)
 
 
 # 召回率
 # 所有正样本中，被正确识别为正样本的比例  TP/TP+FN
-def get_recall():
-
-    return 0
+def get_recall(TP, FN):
+    return TP / (TP + FN)
 
 # 对于点云的关键点来说
 # 令：

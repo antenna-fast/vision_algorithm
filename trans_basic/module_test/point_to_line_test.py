@@ -1,6 +1,8 @@
 from numpy import *
 import matplotlib.pyplot as plt
 
+from point_project import *
+
 l = array([1, 1, 1])
 l_n = array([l[0], l[1]])
 
@@ -10,18 +12,6 @@ l_y = -1 * (l[0] * l_x + l[2]) / l[1]
 
 # 投影点
 p = array([-5, -5])
-
-
-# 投影点[XYZ] 投影线[ABC]
-def pt_to_line(p, l):
-    # 求参数t
-    t = -(l[2] + l[0] * p[0] + l[1] * p[1]) / (l[0] * l_n[0] + l[1] * l_n[1])
-    print('t:', t)
-
-    x = p + t * l_n
-    print(x)
-
-    return x
 
 
 x = pt_to_line(p, l)

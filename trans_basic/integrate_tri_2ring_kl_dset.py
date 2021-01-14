@@ -2,12 +2,10 @@ from numpy import *
 from numpy.linalg import *
 import open3d as o3d
 
-from point_to_plan import pt_to_plan  # px, p, p_n  返回投影后的三维点
-from 正交基变换 import *
-from n_pt_plan import *
+from base_trans import *
 from dist import *  # 距离计算
 
-from scipy.spatial import Delaunay
+from o3d_impl import *
 
 # 超参数
 search_radius = 0.1
@@ -95,68 +93,6 @@ print('pcd2_num:', len(pcd2.points))
 # 输入当前点 邻域
 # 输出: mesh, mesh_normals, normal
 histo = {}
-
-
-def get_mesh(now_pt, vici_pts):
-    # 对每个邻域:
-    # 得到邻域局部坐标系 得到法向量等等
-    coord = get_coord(now_pt, vici_pts)  # 列向量表示三个轴
-    normal = coord[:, 2]  # 第三列
-    # print('coord:\n', coord)
-
-    # 还有一步 利用法向量和中心点,得到平面方程[ABCD]
-    p = get_plan(normal, now_pt)
-
-    # * 找到拓扑结构 START
-    all_pts = vstack((now_pt, vici_pts))
-    # 将周围的点投影到平面
-    plan_pts = []
-    for pt in all_pts:  # 投影函数可以升级  向量化
-        pt_temp = pt_to_plan(pt, p, normal)  # px p pn
-        plan_pts.append(pt_temp)
-
-    plan_pts = array(plan_pts)  # 投影到平面的点
-
-    # 将投影后的点旋转至z轴,得到投影后的二维点
-    coord_inv = inv(coord)  # 反变换
-    # rota_pts = dot(coord_inv, all_pts.T).T  # 将平面旋转到与z平行
-    # 首先要将平面上的点平移到原点 然后再旋转  其实不平移也是可以的，只要xy平面上的结构不变
-
-    rota_pts = dot(coord_inv, plan_pts.T).T  # 将平面旋转到与z平行
-
-    # rota_pts[:, 2] = 0  # 已经投影到xoy(最大平面),在此消除z向轻微抖动
-    pts_2d = rota_pts[:, 0:2]
-
-    # Delauney三角化
-    tri = Delaunay(pts_2d)
-    tri_idx = tri.simplices  # 三角形索引
-    # print(tri_idx)
-
-    # 统计三角形的数量
-    # tri_num = len(tri_idx)
-    # print(tri_num)
-
-    # if tri_num in histo.keys():
-    #     histo[tri_num] += 1
-    # else:
-    #     histo[tri_num] = 1
-
-    # 可视化二维的投影
-    # plt.triplot(pts_2d[:, 0], pts_2d[:, 1], tri.simplices.copy())
-    # plt.plot(pts_2d[:, 0], pts_2d[:, 1], 'o')
-    # plt.show()
-
-    # 根据顶点和三角形索引创建mesh
-    mesh = get_non_manifold_vertex_mesh(all_pts, tri_idx)
-
-    # * 找到拓扑结构 END
-
-    # 求mesh normal
-    mesh.compute_triangle_normals()
-    mesh_normals = array(mesh.triangle_normals)
-    # print(mesh_normals)
-
-    return mesh, mesh_normals, normal
 
 
 # 邻域点个数
