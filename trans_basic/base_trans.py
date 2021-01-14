@@ -69,9 +69,9 @@ if __name__ == '__main__':
     tri_idx = tri.simplices
     # print(tri_idx)  # 三角形索引
 
-    # plt.triplot(pts_2d[:, 0], pts_2d[:, 1], tri.simplices.copy())
-    # plt.plot(pts_2d[:, 0], pts_2d[:, 1], 'o')
-    # plt.show()
+    plt.triplot(pts_2d[:, 0], pts_2d[:, 1], tri.simplices.copy())
+    plt.plot(pts_2d[:, 0], pts_2d[:, 1], 'o')
+    plt.show()
 
     # 此处的输入点应当是原始点云中的
     # mesh = get_non_manifold_vertex_mesh(pts, tri_idx)
