@@ -154,6 +154,10 @@ if __name__ == '__main__':
     scene_pts_r_n = array(pcd2_r.normals)
     num_pts_scene_r = len(scene_pts_r)
 
+
+    # 投票表
+    vote_table = zeros((100, 100))  # 行：参考点个数  列：角度采样
+
     for i in range(num_pts_scene_r):  # 参考点对其他所有点的特征
         pt_i = scene_pts_r[i]  # 参考点
         pt_i_n = scene_pts_r_n[i]
@@ -175,7 +179,9 @@ if __name__ == '__main__':
 
             # 将特征push到hash
             if key_temp in hash_table.keys():
-                print('已经存在')  # 取出并进行匹配投票
+                print('已经存在')
+
+                # 取出并进行匹配投票
 
                 # hash_table[key_temp].append(value_temp)
 
