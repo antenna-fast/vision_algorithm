@@ -124,12 +124,13 @@ if __name__ == '__main__':
                         hash_table[key_temp].append(value_temp)
                     else:
                         # print('尚不存在，需要新建')
-                        hash_table[key_temp] = value_temp
+                        hash_table[key_temp] = [value_temp]
 
             print(i / pts_num)  # 进度
 
         print(hash_table)
         save('hash_table.npy', hash_table)
+
 
     # 以pcd2作为场景 线上匹配
     # 先选定一系列参考点
@@ -156,7 +157,9 @@ if __name__ == '__main__':
 
 
     # 投票表
-    vote_table = zeros((100, 100))  # 行：参考点个数  列：角度采样
+    a_col = int(360 / a_step)
+    # print('a_col:', a_col)  #
+    vote_table = zeros((num_pts_scene_r, 100))  # 行：参考点个数  列：角度采样
 
     for i in range(num_pts_scene_r):  # 参考点对其他所有点的特征
         pt_i = scene_pts_r[i]  # 参考点
@@ -175,19 +178,25 @@ if __name__ == '__main__':
 
             # print(ppf_vec)
             key_temp = str(ppf_vec)
-            value_temp = [i, j]
+            # value_temp = [i, j]
 
             # 将特征push到hash
             if key_temp in hash_table.keys():
-                print('已经存在')
-
+                # print('已经存在')
                 # 取出并进行匹配投票
+                match_pair = hash_table[key_temp]
+                # print('match_pair:', match_pair)
 
-                # hash_table[key_temp].append(value_temp)
+                # 投票  这里哈系表已经完成了历史使命，接下来交给坐标变换
+                for pair in match_pair:
+                    # 拿出每一个匹配到的点对
+                    # 由于保存的是索引，所以需要从模型上查找到对应的点对信息
+                    # 1.将mr与sr对齐到公共坐标系
+                    Tmg = pcd_np[pair[0]]  # mr的索引
+                    Tsg = pt_i
+                    print(Tmg - Tsg)  # 开心的是，这里面已经能够检测出真实的平移变换
 
-            # else:
-            #     print('尚不存在，需要新建')
-            #     hash_table[key_temp] = value_temp
+                    # 接下来就是求alpha
 
     o3d.visualization.draw_geometries([pcd,
                                        pcd2,

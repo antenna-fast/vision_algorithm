@@ -17,10 +17,10 @@ def pt_to_line(p, l):
 
 # 输入:点(nx3) 平面 平面法向量
 # 输出:投影点
-def pt_to_plan(pts_array, plan, p_n):
+def pt_to_plane(pts_array, plan, p_n):
     # 参数t
     res = []
-    for pts in pts_array:
+    for pts in pts_array:  # 这里可以矩阵化  加速计算
         t = -1 * (plan[0] * pts[0] + plan[1] * pts[1] + plan[2] * pts[2] + plan[3]) / (plan[0] * p_n[0] + plan[1] * p_n[1] + plan[2] * p_n[2])
         x = pts + t * p_n
 

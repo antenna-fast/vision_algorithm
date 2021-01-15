@@ -1,7 +1,7 @@
 import open3d as o3d
 
-from module_test.point_to_plan_test import *
-from n_pt_plan import *
+from module_test.point_to_plane_test import *
+from n_pt_plane import *
 from base_trans import *
 
 

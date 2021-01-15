@@ -1,8 +1,8 @@
 import open3d as o3d
 
-from module_test.point_to_plan_test import pt_to_plan  # px, p, p_n  返回投影后的三维点
+from module_test.point_to_plane_test import pt_to_plan  # px, p, p_n  返回投影后的三维点
 from base_trans import *
-from n_pt_plan import *
+from n_pt_plane import *
 
 from scipy.spatial import Delaunay
 

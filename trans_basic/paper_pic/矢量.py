@@ -4,7 +4,7 @@ from numpy import *
 from numpy.linalg import *
 from base_trans import *
 from point_project import *
-from n_pt_plan import *
+from n_pt_plane import *
 
 from o3d_impl import *
 
@@ -67,6 +67,15 @@ def show_coord(cen_pt, vici_pts, coord, title):
     ax.set_ylabel("Y Axis", font1)
     ax.set_zlabel("Z Axis", font1)
 
+    # plt.axis("equal")
+    # 设置等轴
+    # s = array([-50, -25, 0, 25, 50]) * 0.5
+    # scale_x = s - 30
+    # scale_y = s + 25 + 60
+    # scale_z = s - 25
+    # plt.xticks(scale_x)
+    # plt.yticks(scale_y)
+    # ax.set_zticks(scale_z)
     plt.legend()
     plt.show()
 

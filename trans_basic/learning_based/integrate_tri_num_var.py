@@ -4,7 +4,7 @@ import open3d as o3d
 
 from point_to_plan import pt_to_plan  # px, p, p_n  返回投影后的三维点
 from 正交基变换 import *
-from n_pt_plan import *
+from n_pt_plane import *
 from dist import *  # 距离计算
 
 from scipy.spatial import Delaunay
