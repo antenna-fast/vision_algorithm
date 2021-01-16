@@ -159,7 +159,7 @@ if __name__ == '__main__':
     # 投票表
     a_col = int(360 / a_step)
     # print('a_col:', a_col)  #
-    vote_table = zeros((num_pts_scene_r, 100))  # 行：参考点个数  列：角度采样
+    vote_table = zeros((num_pts_scene_r, a_col))  # 行：参考点个数  列：角度采样
 
     for i in range(num_pts_scene_r):  # 参考点对其他所有点的特征
         pt_i = scene_pts_r[i]  # 参考点
@@ -197,6 +197,7 @@ if __name__ == '__main__':
                     print(Tmg - Tsg)  # 开心的是，这里面已经能够检测出真实的平移变换
 
                     # 接下来就是求alpha
+                    vote_table[i][alpha] += 1  # 投票
 
     o3d.visualization.draw_geometries([pcd,
                                        pcd2,
