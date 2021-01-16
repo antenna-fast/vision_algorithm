@@ -147,7 +147,7 @@ print('plan:', plan)
 pts_buff = vstack((cen_pt, vici_pts))  # 所有近邻点
 # pts_buff = vici_pts
 # print('pts_buff_投影前:\n', pts_buff)
-pts_buff = pt_to_plan(pts_buff, plan, vtx_normal)  # 这里 投影点改成矩阵输入形式
+pts_buff = pt_to_plane(pts_buff, plan, vtx_normal)  # 这里 投影点改成矩阵输入形式
 # print('pts_buff_投影后:\n', pts_buff)
 
 # 可视化投影后的点
