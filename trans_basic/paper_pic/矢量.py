@@ -45,24 +45,24 @@ def show_coord(cen_pt, vici_pts, coord, title):
     ax.quiver(cen_pt[0], cen_pt[1], cen_pt[2],  # 起点
               # vtx_normal[0], vtx_normal[1], vtx_normal[2],   # 对应的指向
               x_axis[0], x_axis[1], x_axis[2],  # 对应的指向
-              length=2, normalize=True, color='red')
+              length=1, normalize=True, color='red')
     # y
     ax.quiver(cen_pt.T[0], cen_pt[1], cen_pt[2],  # 起点
               # vtx_normal[0], vtx_normal[1], vtx_normal[2],   # 对应的指向
               y_axis[0], y_axis[1], y_axis[2],  # 对应的指向
-              length=2, normalize=True, color='green')
+              length=1, normalize=True, color='green')
     # z
     ax.quiver(cen_pt[0], cen_pt[1], cen_pt[2],  # 起点
               # vtx_normal[0], vtx_normal[1], vtx_normal[2],   # 对应的指向
               vtx_normal[0], vtx_normal[1], vtx_normal[2],  # 对应的指向
-              length=2, normalize=True, color='blue')
+              length=1, normalize=True, color='blue')
     # # z  all in one
     # ax.quiver(cen_pts.T[0], cen_pts.T[1], cen_pts.T[2],   # 起点
     #           # vtx_normal[0], vtx_normal[1], vtx_normal[2],   # 对应的指向
     #           coord[0], coord[1], coord[2],   # 对应的指向
     #           length=2, normalize=True, color='blue')
 
-    plt.title(str(title))
+    plt.title(str(title), font1)
     ax.set_xlabel("X Axis", font1)
     ax.set_ylabel("Y Axis", font1)
     ax.set_zlabel("Z Axis", font1)
@@ -136,7 +136,7 @@ y_axis = coord[:, 1]
 
 # print('vtx:', cen_pt)
 
-show_coord(cen_pt, vici_pts, coord, title='coord')
+show_coord(cen_pt, vici_pts, coord, title='Tangent Plane Estimation')
 
 # 将点投影到平面
 # 找到平面
@@ -151,6 +151,7 @@ pts_buff = pt_to_plane(pts_buff, plan, vtx_normal)  # 这里 投影点改成矩�
 # print('pts_buff_投影后:\n', pts_buff)
 
 # 可视化投影后的点
+show_coord(pts_buff[0], pts_buff[1:], coord, 'Projected Point Cloud Patch')
 
 # 平面反变换 将平面旋转到XOY
 coord_inv = inv(coord)
@@ -158,7 +159,7 @@ coord_inv_vis = dot(coord_inv, coord)
 roto_pts = dot(coord_inv, pts_buff.T).T  # 将平面旋转到与z平行
 pts_buff = roto_pts
 
-show_coord(roto_pts[0], roto_pts[1:], coord_inv_vis, 'Coord Inverse')
+show_coord(roto_pts[0], roto_pts[1:], coord_inv_vis, 'Oriented Tangent Plane')
 
 # pts_buff[:, 2] = 0  # 已经投影到xoy(最大平面),在此消除z向轻微抖动
 pts_2d = pts_buff[:, 0:2]
@@ -173,7 +174,7 @@ tri_idx = tri.simplices
 
 plt.triplot(pts_2d[:, 0], pts_2d[:, 1], tri.simplices.copy())
 plt.plot(pts_2d[:, 0], pts_2d[:, 1], 'o')
-plt.title('Delaunay')
+plt.title('Delaunay Triangulate')
 plt.show()
 
 # 通过三角形索引构建mesh
