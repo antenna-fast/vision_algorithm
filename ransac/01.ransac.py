@@ -2,6 +2,8 @@ import numpy as np
 import visdom
 import matplotlib.pyplot as plt
 
+import time
+
 # TODO: remove outliers, and expand it to other models
 
 # viz = visdom.Visdom(env='ransac')
@@ -66,6 +68,8 @@ if __name__ == '__main__':
     model_buff = []  # 保存k, b, dist
     sample_num = 50  # over all sample time
 
+    s_time = time.time()
+
     while sample_num > 0:
         sample_num -= 1
         # 1.采样
@@ -105,6 +109,10 @@ if __name__ == '__main__':
 
     idx = np.argmin(model_buff[:, 2])
     print(model_buff[idx])
+
+    e_time = time.time()
+
+    print('time cost:{0}'.format(e_time - s_time))
 
     # viz.line([[0, 0], [10, 10]],
     #          # x,

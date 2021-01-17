@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 # from o3d_impl import *
 
 
-# 求出平面坐标系
+# 根据近邻点 求出平面坐标系
 def get_coord(now_pt, vici_pts):
     # average_data = np.mean(vici_pts, axis=0)  # 求 NX3 向量的均值
     # decentration_matrix = vici_pts - average_data  # 邻域点连接到顶点的向量

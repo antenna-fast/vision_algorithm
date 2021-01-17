@@ -4,21 +4,10 @@ from scipy.spatial.transform import Rotation as R
 
 import scipy
 
+
+# 注意 投影后直接旋转?
 def get_rota(vec):
-    # 得到一个向量在global坐标系中的姿态  角度格式
-    # 将参考点法向量对齐到x轴  这是一个纯旋转变换
-    rad2ang = 180 / pi
-    ang_x = arccos(vec[0] / 1) * rad2ang  # 这里其实求得在原坐标系中的姿态
-    ang_y = arccos(vec[1] / 1) * rad2ang
-    ang_z = arccos(vec[2] / 1) * rad2ang
-
-    # print(ang_x, ang_y, ang_z)
-    # 用角度构造旋转矩阵
-    #  问题：不是直接使用这个角度！
-    r = R.from_rotvec(pi / 180 * array([ang_x, ang_y, ang_z]))  # 角度->弧度
-    r_mat = r.as_matrix()
-    # print('r_mat:\n', r_mat)
-
+    r_mat = 0
     return r_mat
 
 
@@ -67,12 +56,15 @@ if __name__ == '__main__':
     pt_s_t_2 = pt_s_2 - Tsg
     # print(pt_s_t_1, pt_s_t_2)
 
+    # 平移算完了 只需要得到旋转
+    # 基于alpha进行投票?
+
     x_axis = array([1, 0, 0])  # 目标向量
     pt_n_1 = array([0, 0, 1])  # 待
     # res = scipy.spatial.transform.Rotation.align_vectors(x_axis, pt_n_1)
     # print(res)
 
-    # 得到旋转轴  注意 这里坐标系的z轴反了
+    # 得到旋转轴  注意 np里坐标系的z轴反了
     rot_axis = cross(x_axis, pt_n_1)  # np
     # rot_axis = cross(x_axis, pt_n_1)
     print('rot_axis_1:', rot_axis)
