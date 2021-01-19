@@ -7,8 +7,6 @@ from base_trans import *
 from n_pt_plane import *
 from dist import *  # 距离计算
 
-from scipy.spatial import Delaunay
-
 
 # 将点云转换成mesh
 # 思路：保存顶点和三角拓扑

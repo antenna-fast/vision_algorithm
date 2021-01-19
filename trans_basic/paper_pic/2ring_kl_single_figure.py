@@ -13,7 +13,7 @@ import matplotlib.ticker as ticker
 pcd = o3d.io.read_point_cloud('../../data_ply/Armadillo.ply')
 pcd = pcd.voxel_down_sample(voxel_size=2)
 pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=8, max_nn=10))
-pcd.paint_uniform_color([0.0, 0.5, 0.1])
+pcd.paint_uniform_color([0.0, 0.5, 0.5])
 # 构建搜索树
 pcd_tree_1 = o3d.geometry.KDTreeFlann(pcd)
 
@@ -108,18 +108,28 @@ threshold = 0.5
 i = 6992  # xiongxiong
 # i = 3511  # 耳朵尖  ear
 # i = 2314  # 脚尖
-i= 8805  # 鼻子  可以  nose
+i = 8805  # 鼻子  可以  nose
 # i = 621  # 胯部
+# i = 5460  # test
+i = 1671  # test
+# i = 1343  # test
 
-idx_list = []
-part_map = {3511: 'Ear', 2314: 'Tiptoe', 8805: 'Nose', 621: '', 6992:'Belly'}
+idx_list = [1671, 8805, 3511]
+part_map = {3511: 'Ear', 2314: 'Tiptoe', 8805: 'Nose', 621: '', 6992: 'Belly',
+            5460: 'Knee',
+            i: 'Test'
+            }
 
 # 模型1
-angle_buff = []  # 每个环上的角度向量
+
 # kl_buff = []
 
 # for i in range(pts_num):
-if 1:
+# if 1:
+for i in idx_list:
+
+    angle_buff = []  # 每个环上的角度向量
+
     # print("Paint the 1500th point red.")
     pick_idx = i
 
@@ -190,50 +200,50 @@ if 1:
     #     pcd.colors[pick_idx] = [1, 0, 0]  # 选一个点
     #     key_pts_buff_1.append(now_pt_1)
 
-# savetxt('save_file/key_pts_buff_1_' + str(noise_rate) + '.txt', key_pts_buff_1)
+    # savetxt('save_file/key_pts_buff_1_' + str(noise_rate) + '.txt', key_pts_buff_1)
 
-# 保存角度向量
-# angle_buff = array(angle_buff)
-# savetxt('../save_file/angle_buff_1_' + str(i) + '.txt', angle_buff)
+    # 保存角度向量
+    # angle_buff = array(angle_buff)
+    # savetxt('../save_file/angle_buff_1_' + str(i) + '.txt', angle_buff)
 
+    # 可视化角度向量
+    x_num = len(angle_buff[0])
+    x_line = list(range(1, x_num + 1))
+    row_num = len(angle_buff)
+    print('x_line:', x_line)
 
-# 可视化角度向量
-x_num = len(angle_buff[0])
-x_line = list(range(1, x_num + 1))
-row_num = len(angle_buff)
-print('x_line:', x_line)
+    # 水平刻度
+    for y_line in arange(0, 1, 0.1):
+        plt.hlines(y_line, 1, x_num, colors="gray", linestyles="dashed")  # x, ymin, ymax
+        # plt.vlines(i, 0, 0.5, colors="r", linestyles="dashed")  # x, ymin, ymax
 
-# 水平刻度
-for y_line in arange(0, 1, 0.1):
-    plt.hlines(y_line, 1, x_num, colors="gray", linestyles="dashed")  # x, ymin, ymax
-    # plt.vlines(i, 0, 0.5, colors="r", linestyles="dashed")  # x, ymin, ymax
+    # 所有的数据
+    marker_map = {0: 'o', 1: '*', 2: '^', 3: 'x', 4: 'v', 5: 's', 6: 'p', 7: '+'}
+    color_map = {}
+    for row in range(row_num):
+        plt.plot(x_line, angle_buff[row])
+        plt.scatter(x_line, angle_buff[row], marker=marker_map[row])
 
-# 所有的数据
-marker_map = {0: 'o', 1: '*', 2: '^', 3: 'x', 4: 'v', 5: 's', 6: 'p', 7: '+'}
-color_map = {}
-for row in range(row_num):
-    plt.plot(x_line, angle_buff[row])
-    plt.scatter(x_line, angle_buff[row], marker=marker_map[row])
+    # x坐标轴设置整数
+    plt.xticks(x_line)
 
-# x坐标轴设置整数
-plt.xticks(x_line)
+    font1 = {'family': 'Times New Roman',
+             'weight': 'normal',
+             'size': 13,
+             }
+    plt.title(part_map[i], font1)
 
-font1 = {'family': 'Times New Roman',
-         'weight': 'normal',
-         'size': 13,
-         }
-plt.title(part_map[i], font1)
+    plt.show()
 
-plt.show()
-
-# 可视化KL
-print('kl_buff:', kl_buff)
-# savetxt('../save_file/kl_buff_' + str(pick_idx) + '.txt', kl_buff)
-savetxt('../save_file/kl_buff_' + str(pick_idx) + '.txt', kl_buff)
-
-x_line = list(range(len(kl_buff)))
-plt.plot(x_line, kl_buff)
-# plt.show()
+    # 可视化KL
+    # print('kl_buff:', kl_buff)
+    # # savetxt('../save_file/kl_buff_' + str(pick_idx) + '.txt', kl_buff)
+    # savetxt('../save_file/kl_buff_' + str(pick_idx) + '.txt', kl_buff)
+    #
+    # x_line = list(range(len(kl_buff)))
+    # plt.plot(x_line, kl_buff)
+    #
+    # plt.show()
 
 #
 # # 变换后  模型2
@@ -312,16 +322,17 @@ plt.plot(x_line, kl_buff)
 
 # axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=8, origin=[0, 0, 0])
 # 查看选的点是否正确
-o3d.visualization.draw_geometries([pcd,
-                                   # pcd2,
-                                   # axis_pcd,
-                                   # mesh1,
-                                   # mesh2
-                                   ],
-                                  window_name='ANTenna3D',
-                                  # zoom=0.3412,
-                                  # front=[0.4257, -0.2125, -0.8795],
-                                  # lookat=[2.6172, 2.0475, 1.532],
-                                  # up=[-0.0694, -0.9768, 0.2024]
-                                  # point_show_normal=True
-                                  )
+
+# o3d.visualization.draw_geometries([pcd,
+#                                    # pcd2,
+#                                    # axis_pcd,
+#                                    # mesh1,
+#                                    # mesh2
+#                                    ],
+#                                   window_name='ANTenna3D',
+#                                   # zoom=0.3412,
+#                                   # front=[0.4257, -0.2125, -0.8795],
+#                                   # lookat=[2.6172, 2.0475, 1.532],
+#                                   # up=[-0.0694, -0.9768, 0.2024]
+#                                   # point_show_normal=True
+#                                   )

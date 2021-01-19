@@ -93,11 +93,11 @@ def get_mesh_idx(now_pt, vici_pts):
     all_pts = vstack((now_pt, vici_pts))
     # 将周围的点投影到平面
     plan_pts = []
-    for pt in all_pts:  # 投影函数可以升级  向量化  map
-        pt_temp = pt_to_plan(pt, p, normal)  # px p pn
-        plan_pts.append(pt_temp)
+    # for pt in all_pts:  # 投影函数可以升级  向量化  map
+    plan_pts = pt_to_plane(all_pts, p, normal)  # px p pn
+    # plan_pts.append(pt_temp)
 
-    plan_pts = array(plan_pts)  # 投影到平面的点
+    # plan_pts = array(plan_pts)  # 投影到平面的点
 
     # 将投影后的点旋转至z轴,得到投影后的二维点
     coord_inv = inv(coord)  # 反变换
