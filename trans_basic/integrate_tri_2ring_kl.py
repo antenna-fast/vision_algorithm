@@ -15,8 +15,15 @@ pcd.paint_uniform_color([0.0, 0.5, 0.1])
 # 构建搜索树
 pcd_tree_1 = o3d.geometry.KDTreeFlann(pcd)
 
+noise_mode = 1  # 0 for vstack and 1 for jatter
+noise_rate = 0.01  # 噪声占比
+scale_ratio = 1  # 尺度
+
+# 加噪声
+# 不加噪声 100%重复
+
 # 加载 2
-pcd_trans = array(pcd.points)  # nx3
+pcd_trans = array(pcd.points) * scale_ratio  # nx3
 
 # 定义变换
 r = R.from_rotvec(pi / 180 * array([30, 60, 30]))  # 角度->弧度
@@ -27,6 +34,7 @@ print('r_mat:\n', r_mat)
 
 pcd_trans = dot(r_mat, pcd_trans.T).T
 pcd_trans = pcd_trans + t_vect
+
 
 # 加噪声
 
@@ -71,13 +79,6 @@ else:
 pcd2 = o3d.geometry.PointCloud()
 pcd2.points = o3d.utility.Vector3dVector(pcd_trans)
 
-print('pcd1_num:', len(pcd.points))
-print('pcd2_num:', len(pcd2.points))
-
-
-pcd2 = o3d.geometry.PointCloud()
-pcd2.points = o3d.utility.Vector3dVector(pcd_trans)
-
 # print("Recompute the normal of the downsampled point cloud")
 pcd2.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=8, max_nn=10))
 pcd2.paint_uniform_color([0.0, 0.5, 0.1])
@@ -86,6 +87,9 @@ pcd2.paint_uniform_color([0.0, 0.5, 0.1])
 # 构建搜索树
 pcd_tree_2 = o3d.geometry.KDTreeFlann(pcd2)
 
+
+print('pcd1_num:', len(pcd.points))
+print('pcd2_num:', len(pcd2.points))
 
 # 可视化待检测数据
 
@@ -112,12 +116,12 @@ pcd_tree_2 = o3d.geometry.KDTreeFlann(pcd2)
 # 输出: mesh, mesh_normals, normal
 histo = {}
 
-vici_num = 7
+vici_num = 9
 cut_num = 5
 
 pts_num = len(pcd.points)
 
-threshold = 1
+threshold = 0.5
 
 i = 150
 # 模型1
@@ -196,8 +200,8 @@ savetxt('save_file/key_pts_buff_1_' + str(noise_rate) + '.txt', key_pts_buff_1)
 # 变换后  模型2
 key_pts_buff_2 = []
 
-if 1:
-# for i in range(pts_num):
+# if 1:
+for i in range(pts_num):
 
     # print("Paint the 1500th point red.")
     pick_idx = i
@@ -261,13 +265,16 @@ if 1:
     if sum_var > threshold:
         pcd2.colors[pick_idx] = [1, 0, 0]  # 选一个点
         key_pts_buff_2.append(now_pt_2)
+
+
 key_pts_buff_2 = array(key_pts_buff_2)
+
 savetxt('save_file/key_pts_buff_2_' + str(noise_rate) + '.txt', key_pts_buff_2)
 
 axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=8, origin=[0, 0, 0])
 
 o3d.visualization.draw_geometries([pcd,
-                                   # pcd2,
+                                   pcd2,
                                    axis_pcd,
                                    # mesh1,
                                    # mesh2

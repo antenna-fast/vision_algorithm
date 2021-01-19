@@ -8,20 +8,6 @@ from n_pt_plane import *
 
 from o3d_impl import *
 
-# fig = plt.figure()
-# ax = fig.gca(projection='3d')
-
-# # Make the grid
-# x, y, z = np.meshgrid(np.arange(-0.8, 1, 0.2),
-#                       np.arange(-0.8, 1, 0.2),
-#                       np.arange(-0.8, 1, 0.8))
-#
-# # Make the direction data for the arrows
-# u = np.sin(np.pi * x) * np.cos(np.pi * y) * np.cos(np.pi * z)
-# v = -np.cos(np.pi * x) * np.sin(np.pi * y) * np.cos(np.pi * z)
-# w = (np.sqrt(2.0 / 3.0) * np.cos(np.pi * x) * np.cos(np.pi * y) *
-#      np.sin(np.pi * z))
-
 
 # 显示点云和坐标轴
 def show_coord(cen_pt, vici_pts, coord, title):
@@ -103,7 +89,6 @@ all_pts = vstack((cen_pt, vici_pts))
 #           u, v, w,   # 对应的指向
 #           length=2, normalize=True)
 
-
 font1 = {'family': 'Times New Roman',
          'weight': 'normal',
          'size': 13,
@@ -112,7 +97,7 @@ font1 = {'family': 'Times New Roman',
 ax = plt.figure(1).gca(projection='3d')
 
 ax.plot(x, y, z, 'g.', color='green',  label='neighbor')  # 近邻点
-ax.plot(u, v, w, 'o', color='red', label='vertex')  # 中心点
+ax.plot([u], [v], [w], 'o', color='red', label='vertex')  # 中心点
 # ax.plot(x[0], x[1], x[2], 'r.')
 ax.set_xlabel("X Axis", font1)
 ax.set_ylabel("Y Axis", font1)

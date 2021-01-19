@@ -33,5 +33,26 @@ def get_KL(vec1, vec2, vec_len):
     return dist
 
 
+# 输入一个序列  输出是否不平衡
+def get_unbalance(vec, threshold):
+    len_vec = len(vec)
+    sort_vec = sort(vec)
+    sort_vec_cut = sort_vec[:len_vec-1]  # 前面的len-1个
+
+    diff = sort_vec[1:] - sort_vec_cut  # 一个以后的-前面n-1个  包含n-1个元素  为了快速计算
+
+    # print('sort_vec:', sort_vec)
+    # print('diff:', diff)
+    res = 0  # 是否平衡点
+    if max(diff) > threshold:
+        res = 1
+
+    return res
+
+
 if __name__ == '__main__':
-    print()
+
+    # 不平衡点测试
+    a = array([3, 2, 4, 5, 1, 9])  # 序列
+    res = get_unbalance(a, 1)
+    print('res:', res)
