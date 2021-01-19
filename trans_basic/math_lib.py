@@ -37,7 +37,7 @@ a = array([1, 1, 2])
 
 
 def vec_proj_scale(vec_1, vec_2):
-    # 将向量1投影到向量2
+    # 将向量1投影到向量2  标量
     norm_vec_1 = norm(vec_1)
     cos = dot(vec_1, vec_2) / (norm_vec_1 * norm(vec_2))
     res = norm_vec_1 * cos
@@ -49,9 +49,6 @@ def vec_proj_vec(vec_1, vec_2):
     norm_vec_2 = norm(vec_2)
     res = dot(dot(vec_1, vec_2), vec_2) / (norm_vec_2**2)
     return res
-
-# def get_
-#
 
 
 if __name__ == '__main__':

@@ -154,7 +154,7 @@ for i in range(pts_num):
     # print(n_fn_angle_1)
 
     # 二环
-    var_buff = []
+    kl_buff = []
     n_fn_angle_buff_1 = []
 
     for now_pt_2r in vici_idx_1:  # 比较二环与中心环的区别
@@ -186,11 +186,11 @@ for i in range(pts_num):
         kl_loss = get_KL(vic_ang_1, n_fn_angle_1, cut_num)  # vec1, vec2, vec_len
 
         # print(kl_loss)
-        var_buff.append(kl_loss)
+        kl_buff.append(kl_loss)
 
-    var_buff = array(var_buff)
+    kl_buff = array(kl_buff)
     # sum_var = var(var_buff)
-    res = get_unbalance(var_buff, threshold)
+    res = get_unbalance(kl_buff, threshold)  # 不平衡点
 
     # if sum_var > threshold:
     if res:

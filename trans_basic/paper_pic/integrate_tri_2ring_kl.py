@@ -1,18 +1,29 @@
-from dist import *  # 距离计算
-from o3d_impl import *
+from numpy import *
+from numpy.linalg import *
+import open3d as o3d
 
-# TODO: 为了可视化
+from o3d_impl import *
+from base_trans import *
+from dist import *  # 距离计算
+
 
 # 加载 1
-pcd = o3d.io.read_point_cloud('../../data_ply/Armadillo.ply')
+pcd = o3d.io.read_point_cloud('../data_ply/Armadillo.ply')
 pcd = pcd.voxel_down_sample(voxel_size=3)
 pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=8, max_nn=10))
 pcd.paint_uniform_color([0.0, 0.5, 0.1])
 # 构建搜索树
 pcd_tree_1 = o3d.geometry.KDTreeFlann(pcd)
 
+noise_mode = 1  # 0 for vstack and 1 for jatter
+noise_rate = 0.01  # 噪声占比
+scale_ratio = 1  # 尺度
+
+# 加噪声
+# 不加噪声 100%重复
+
 # 加载 2
-pcd_trans = array(pcd.points)  # nx3
+pcd_trans = array(pcd.points) * scale_ratio  # nx3
 
 # 定义变换
 r = R.from_rotvec(pi / 180 * array([30, 60, 30]))  # 角度->弧度
@@ -23,6 +34,7 @@ print('r_mat:\n', r_mat)
 
 pcd_trans = dot(r_mat, pcd_trans.T).T
 pcd_trans = pcd_trans + t_vect
+
 
 # 加噪声
 
@@ -67,13 +79,6 @@ else:
 pcd2 = o3d.geometry.PointCloud()
 pcd2.points = o3d.utility.Vector3dVector(pcd_trans)
 
-print('pcd1_num:', len(pcd.points))
-print('pcd2_num:', len(pcd2.points))
-
-
-pcd2 = o3d.geometry.PointCloud()
-pcd2.points = o3d.utility.Vector3dVector(pcd_trans)
-
 # print("Recompute the normal of the downsampled point cloud")
 pcd2.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=8, max_nn=10))
 pcd2.paint_uniform_color([0.0, 0.5, 0.1])
@@ -83,10 +88,12 @@ pcd2.paint_uniform_color([0.0, 0.5, 0.1])
 pcd_tree_2 = o3d.geometry.KDTreeFlann(pcd2)
 
 
+print('pcd1_num:', len(pcd.points))
+print('pcd2_num:', len(pcd2.points))
+
 # 可视化待检测数据
-#
+
 # axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=8, origin=[0, 0, 0])
-#
 # o3d.visualization.draw_geometries([pcd,
 #                                    # pcd2,
 #                                    axis_pcd,
@@ -114,13 +121,13 @@ cut_num = 5
 
 pts_num = len(pcd.points)
 
-threshold = 1
+threshold = 0.5
 
-i = 360
+i = 150
 # 模型1
 key_pts_buff_1 = []
-# for i in range(pts_num):
-if 1:
+for i in range(pts_num):
+# if 1:
     # print("Paint the 1500th point red.")
     pick_idx = i
 
@@ -134,11 +141,6 @@ if 1:
     now_pt_1 = array(pcd.points)[i]
     vici_pts_1 = array(pcd.points)[vici_idx_1]
     # all_pts = array(pcd.points)[idx_1]
-
-    # 保存需要的点
-    savetxt('../save_file/now_pts_pic.txt', now_pt_1)
-    savetxt('../save_file/vic_pts_pic.txt', vici_pts_1)
-
     mesh1, mesh_normals, vtx_normal = get_mesh(now_pt_1, vici_pts_1)
 
     # 构建一环的特征
@@ -198,8 +200,8 @@ savetxt('save_file/key_pts_buff_1_' + str(noise_rate) + '.txt', key_pts_buff_1)
 # 变换后  模型2
 key_pts_buff_2 = []
 
-if 1:
-# for i in range(pts_num):
+# if 1:
+for i in range(pts_num):
 
     # print("Paint the 1500th point red.")
     pick_idx = i
@@ -263,13 +265,16 @@ if 1:
     if sum_var > threshold:
         pcd2.colors[pick_idx] = [1, 0, 0]  # 选一个点
         key_pts_buff_2.append(now_pt_2)
+
+
 key_pts_buff_2 = array(key_pts_buff_2)
+
 savetxt('save_file/key_pts_buff_2_' + str(noise_rate) + '.txt', key_pts_buff_2)
 
 axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=8, origin=[0, 0, 0])
 
 o3d.visualization.draw_geometries([pcd,
-                                   # pcd2,
+                                   pcd2,
                                    axis_pcd,
                                    # mesh1,
                                    # mesh2

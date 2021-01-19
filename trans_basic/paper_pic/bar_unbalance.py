@@ -39,8 +39,9 @@ def get_unbalance(vec, threshold):
 
 
 if __name__ == '__main__':
-       print()
-
-       a = array([3, 2, 4, 5, 1, 9])  # 序列
-       res = get_unbalance(a, 1)
-       print('res:', res)
+    i = 8805
+    a = loadtxt('../save_file/kl_buff_' + str(i) + '.txt')
+    print(a)
+    # a = array([3, 2, 4, 5, 1, 9])  # 序列
+    res = get_unbalance(a, 1)
+    print('res:', res)

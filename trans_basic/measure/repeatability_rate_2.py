@@ -24,7 +24,7 @@ from scipy.spatial import Delaunay
 # (rep(X,Y) + ep(Y,X)) / 2
 
 # 加载 1
-pcd = o3d.io.read_point_cloud('../data_ply/Armadillo.ply')
+pcd = o3d.io.read_point_cloud('../../data_ply/Armadillo.ply')
 pcd = pcd.voxel_down_sample(voxel_size=2)
 pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=8, max_nn=10))
 pcd.paint_uniform_color([0.0, 0.6, 0.1])

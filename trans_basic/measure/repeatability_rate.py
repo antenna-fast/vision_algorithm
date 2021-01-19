@@ -1,15 +1,12 @@
 import open3d as o3d
 
-<<<<<<< HEAD:trans_basic/measure/repeatability_rate.py
 from scipy.spatial.transform import Rotation as R
 from dist import *  # 距离计算
 
 
-=======
 from base_trans import *
 from dist import *  # 距离计算
 
->>>>>>> c097736c933ccba9e01a6339a6f62e1aee0a0cff:trans_basic/repeatability_rate.py
 # 给定两个检测出来的关键点，在经过变换之后，看第二个检测出来的是不是在邻域范围之内
 # 如果是，就认为是重合的
 
@@ -140,7 +137,6 @@ if __name__ == '__main__':
     scale_ratio = 1  # 尺度因子
 
     # 加载保存的关键点
-<<<<<<< HEAD:trans_basic/measure/repeatability_rate.py
 
     repeat_buff = []
     for noise_rate in noise_rate_list:
@@ -183,7 +179,6 @@ if __name__ == '__main__':
         #                                   # up=[-0.0694, -0.9768, 0.2024]
         #                                   # point_show_normal=True
         #                                   )
-=======
     key_pts_buff_1 = loadtxt('save_file/key_pts_buff_1.txt')
     key_pts_buff_2 = loadtxt('save_file/key_pts_buff_2.txt')
     print(key_pts_buff_1)
@@ -218,4 +213,3 @@ if __name__ == '__main__':
                                       # up=[-0.0694, -0.9768, 0.2024]
                                       # point_show_normal=True
                                       )
->>>>>>> c097736c933ccba9e01a6339a6f62e1aee0a0cff:trans_basic/repeatability_rate.py
