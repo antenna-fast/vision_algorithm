@@ -8,9 +8,16 @@ from n_pt_plane import *
 
 from o3d_impl import *
 
+from mpl_toolkits.mplot3d import Axes3D
+from matplotlib.pyplot import MultipleLocator
+# 从pyplot导入MultipleLocator类，这个类用于设置刻度间隔
+
+from vec_pose import *
+
 
 # 显示点云和坐标轴
 def show_coord(cen_pt, vici_pts, coord, title):
+
     font1 = {'family': 'Times New Roman',
              'weight': 'normal',
              'size': 13,
@@ -19,6 +26,9 @@ def show_coord(cen_pt, vici_pts, coord, title):
     vtx_normal = coord[:, 2]  # z_axis
     x_axis = coord[:, 0]
     y_axis = coord[:, 1]
+
+    # print('dot:', dot(x_axis, vtx_normal))
+    # print('dot:', dot(y_axis, vtx_normal))
 
     vici_pts = vici_pts.T
     ax = plt.figure(1).gca(projection='3d')
@@ -53,38 +63,45 @@ def show_coord(cen_pt, vici_pts, coord, title):
     ax.set_ylabel("Y Axis", font1)
     ax.set_zlabel("Z Axis", font1)
 
-    # plt.axis("equal")
+    # 对于拟合的坐标系: 以顶点为圆心  首先将边沿点移动到圆心,生成平面后再将平面移动到中心点
+    # print(vici_pts.shape)
+
+    v_buff = []
+    for t in range(1, 360, 12):
+        v_rot = get_rodrigues(vici_pts.T[0] - cen_pt, t, vtx_normal)
+        v_buff.append(v_rot)
+    v_buff = array(v_buff).T
+    v_buff = (v_buff.T + cen_pt).T
+    ax.plot_trisurf(v_buff[0], v_buff[1], v_buff[2], linewidth=0.2, antialiased=True, alpha=0.5)
+
     # 设置等轴
-    # s = array([-50, -25, 0, 25, 50]) * 0.5
-    # scale_x = s - 30
-    # scale_y = s + 25 + 60
-    # scale_z = s - 25
-    # plt.xticks(scale_x)
-    # plt.yticks(scale_y)
-    # ax.set_zticks(scale_z)
+    x_major_locator = MultipleLocator(1)
+    y_major_locator = MultipleLocator(1)
+    z_major_locator = MultipleLocator(1)
+    ax.xaxis.set_major_locator(x_major_locator)
+    ax.yaxis.set_major_locator(y_major_locator)
+    ax.zaxis.set_major_locator(z_major_locator)
+
     plt.legend()
+    # plt.axis('off')  # 关闭坐标轴
     plt.show()
 
     return 0
 
 
-# 数据设置
-# x = [0, 1, 2]
-# y = x
-# z = x
 # 近邻点
-vici_pts = loadtxt('../save_file/vic_pts_pic.txt')
+vici_pts = loadtxt('../save_file/vici_pts.txt')
 # print(vici_pts)
 x, y, z = vici_pts.T[0], vici_pts.T[1], vici_pts.T[2]
 
 # 顶点
-cen_pt = loadtxt('../save_file/now_pts_pic.txt')
+cen_pt = loadtxt('../save_file/now_pt.txt')
 # print(cen_pt)
 u, v, w = cen_pt[0], cen_pt[1], cen_pt[2]
 
 all_pts = vstack((cen_pt, vici_pts))
 
-# 绘制点
+# 绘制箭头点
 # ax.quiver(x, y, z,   # 起点
 #           u, v, w,   # 对应的指向
 #           length=2, normalize=True)
@@ -96,7 +113,7 @@ font1 = {'family': 'Times New Roman',
 
 ax = plt.figure(1).gca(projection='3d')
 
-ax.plot(x, y, z, 'g.', color='green',  label='neighbor')  # 近邻点
+ax.plot(x, y, z, 'g.', color='green', label='neighbor')  # 近邻点
 ax.plot([u], [v], [w], 'o', color='red', label='vertex')  # 中心点
 # ax.plot(x[0], x[1], x[2], 'r.')
 ax.set_xlabel("X Axis", font1)
@@ -108,8 +125,19 @@ ax.set_zlabel("Z Axis", font1)
 # ax.set_zlim(-10, 10)
 plt.title('Point Cloud Patch', font1)
 ax.legend()  # Add a legend.
-plt.show()
+# plt.axis('off')  # 关闭坐标轴
 
+x_major_locator = MultipleLocator(1)
+y_major_locator = MultipleLocator(1)
+z_major_locator = MultipleLocator(1)
+ax.xaxis.set_major_locator(x_major_locator)
+ax.yaxis.set_major_locator(y_major_locator)
+ax.zaxis.set_major_locator(z_major_locator)
+
+# ax.set_facecolor('green')  # 背景
+ax.grid(b=False)
+
+plt.show()
 
 # 找到拟合的坐标系
 coord = get_coord(cen_pt, vici_pts)
@@ -120,6 +148,7 @@ y_axis = coord[:, 1]
 # print(coord)
 
 # print('vtx:', cen_pt)
+
 
 show_coord(cen_pt, vici_pts, coord, title='Tangent Plane Estimation')
 
@@ -159,7 +188,10 @@ tri_idx = tri.simplices
 
 plt.triplot(pts_2d[:, 0], pts_2d[:, 1], tri.simplices.copy())
 plt.plot(pts_2d[:, 0], pts_2d[:, 1], 'o')
-plt.title('Delaunay Triangulate')
+plt.title('Delaunay Triangulate', font1)
+
+# ax.set_axis_bgcolor('white')
+
 plt.show()
 
 # 通过三角形索引构建mesh
@@ -197,4 +229,3 @@ o3d.visualization.draw_geometries([mesh,
                                   # up=[-0.0694, -0.9768, 0.2024]
                                   # point_show_normal=True
                                   )
-

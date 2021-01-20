@@ -1,4 +1,5 @@
 import numpy as np
+from numpy import *
 import visdom
 import matplotlib.pyplot as plt
 
@@ -27,7 +28,7 @@ if __name__ == '__main__':
 
     # gen_data
     # define y=2*x + 3
-    x = np.arange(0, 10, 0.2)
+    x = np.arange(0, 10, 0.1)
     y = 2 * x + 3 + np.random.rand(len(x))  # ok
     # print(x)
     # Y, X
@@ -65,8 +66,12 @@ if __name__ == '__main__':
     # 重复上述步骤
 
     data_len = len(pts)
+
+    # 每个点的权重
+    data_w = ones(data_len)  # 初始化权重  这个要进行更新  目的是驱动函数找到内点 内点权重要变大
+
     model_buff = []  # 保存k, b, dist
-    sample_num = 50  # over all sample time
+    sample_num = 30  # over all sample time
 
     s_time = time.time()
 
@@ -87,8 +92,11 @@ if __name__ == '__main__':
 
         # 评价，将[x, y]代进去，如果点到直线的距离小于某个数值，该模型就得分
         dist = 0  # init dist
+        # pts_sample = pts[]  # 对模型点再次进行采样  里面对内点赋予权重
         for pt in pts:  # all point!
-            dist += get_pt2line_dist(pt, k, b)
+            dist_i = get_pt2line_dist(pt, k, b)
+            # data_w[i] = dist_i
+            dist += dist_i  # 模型的总体性能
             # print('dist:', dist)
 
         # print('model score:', dist)

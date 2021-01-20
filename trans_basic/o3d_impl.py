@@ -76,6 +76,12 @@ def get_mesh(now_pt, vici_pts):
     mesh_normals = array(mesh.triangle_normals)
     # print(mesh_normals)
 
+    # 法向量同相化
+    for i in range(len(mesh_normals)):
+        if dot(mesh_normals[i], normal) < 0:
+            mesh_normals[i] = -mesh_normals[i]
+    mesh.triangle_normals = o3d.utility.Vector3dVector(mesh_normals)
+
     return mesh, mesh_normals, normal
 
 

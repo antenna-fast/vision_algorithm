@@ -8,7 +8,7 @@ from dist import *  # 距离计算
 
 
 # 加载 1
-pcd = o3d.io.read_point_cloud('../data_ply/Armadillo.ply')
+pcd = o3d.io.read_point_cloud('../../data_ply/Armadillo.ply')
 pcd = pcd.voxel_down_sample(voxel_size=3)
 pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=8, max_nn=10))
 pcd.paint_uniform_color([0.0, 0.5, 0.1])
@@ -195,7 +195,7 @@ for i in range(pts_num):
         pcd.colors[pick_idx] = [1, 0, 0]  # 选一个点
         key_pts_buff_1.append(now_pt_1)
 
-savetxt('save_file/key_pts_buff_1_' + str(noise_rate) + '.txt', key_pts_buff_1)
+savetxt('../save_file/key_pts_buff_1_' + str(noise_rate) + '.txt', key_pts_buff_1)
 
 # 变换后  模型2
 key_pts_buff_2 = []
@@ -269,7 +269,7 @@ for i in range(pts_num):
 
 key_pts_buff_2 = array(key_pts_buff_2)
 
-savetxt('save_file/key_pts_buff_2_' + str(noise_rate) + '.txt', key_pts_buff_2)
+savetxt('../save_file/key_pts_buff_2_' + str(noise_rate) + '.txt', key_pts_buff_2)
 
 axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=8, origin=[0, 0, 0])
 

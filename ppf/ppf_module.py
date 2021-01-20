@@ -10,14 +10,12 @@ from numpy import *
 from numpy.linalg import *
 import open3d as o3d
 
-a = np.array([1, 0, 0])
-b = np.array([0, 1, 0])
+from vec_pose import *
 
-a_norm = array([1, 0, 0])
-b_norm = array([0, 1, 0])
+import time
 
 
-# 计算夹角  注意 这个会导致不稳定，opencv建议使用 arctan！
+# 计算夹角  注意 这个会导致不稳定，opencv建议使用 arctan?
 # 原理：向量内积的几何意义：向量a在b上的投影
 def get_ang(vec_1, vec_2):
     theta = arccos(dot(vec_1, vec_2) / (norm(vec_1) * norm(vec_2))) * 180 / pi
@@ -65,7 +63,6 @@ if __name__ == '__main__':
 
     pts_num = len(pcd_np)  # 模型的点数
 
-
     # 制作场景
     pcd_trans = array(pcd.points)  # nx3
     # pcd_trans = dot(r_mat, pcd_trans.T).T
@@ -83,10 +80,11 @@ if __name__ == '__main__':
 
     # 从构建pcd1 线下构建
     # pick one point
-        # compare it with any other points
-        # computer PPF
-        # 离散化并向下取整 然后把点对索引聚类  点对特征相似的，聚集在一起
-        # 保存
+
+    # compare it with any other points
+    # computer PPF
+    # 离散化并向下取整 然后把点对索引聚类  点对特征相似的，聚集在一起
+    # 保存
 
     # 全据特征描述是从PPF特征描述到模型的映射
 
@@ -110,7 +108,7 @@ if __name__ == '__main__':
                     # 计算<mi, mj>的PPF
                     ppf_vec = get_ppf(pt_i, pt_j, pt_i_n, pt_j_n)  # pt1, pt2, n1, n2
 
-                    # 特征离散化
+                    # PPF离散化
                     ppf_vec[0] = (ppf_vec[0] / d_step).astype(int)
                     ppf_vec[1:] = (ppf_vec[1:] / a_step).astype(int)
 
@@ -130,7 +128,7 @@ if __name__ == '__main__':
 
         print(hash_table)
         save('hash_table.npy', hash_table)
-
+        # 还要保存计算好的Alpha等参数
 
     # 以pcd2作为场景 线上匹配
     # 先选定一系列参考点
@@ -138,9 +136,12 @@ if __name__ == '__main__':
     # 这些特征与模型的全局描述进行匹配？ 每一个潜在的匹配 投票位姿（相对于参考点）
 
     # 加载hash table
+
+    s_time = time.time()
+
     hash_table = load('hash_table.npy', allow_pickle=True).item()
     # print(hash_table)
-    print(hash_table)
+    # print(hash_table)
 
     # 场景中的所有点
     scene_pts = array(pcd2.points)
@@ -155,7 +156,6 @@ if __name__ == '__main__':
     scene_pts_r_n = array(pcd2_r.normals)
     num_pts_scene_r = len(scene_pts_r)
 
-
     # 投票表
     a_col = int(360 / a_step)
     # print('a_col:', a_col)  #
@@ -165,39 +165,68 @@ if __name__ == '__main__':
         pt_i = scene_pts_r[i]  # 参考点
         pt_i_n = scene_pts_r_n[i]
         for j in range(num_scene_pts):
-            pt_j = scene_pts[j]
-            pt_j_n = scene_pts_n[i]
-            ppf_vec = get_ppf(pt_i, pt_j, pt_i_n, pt_j_n)  # pt1, pt2, n1, n2
+            if i != j:  # 排除自己
+                pt_j = scene_pts[j]
+                pt_j_n = scene_pts_n[i]
+                ppf_vec = get_ppf(pt_i, pt_j, pt_i_n, pt_j_n)  # pt1, pt2, n1, n2
 
-            # 特征离散化
-            ppf_vec[0] = (ppf_vec[0] / d_step).astype(int)
-            ppf_vec[1:] = (ppf_vec[1:] / a_step).astype(int)
+                # 特征离散化
+                ppf_vec[0] = (ppf_vec[0] / d_step).astype(int)
+                ppf_vec[1:] = (ppf_vec[1:] / a_step).astype(int)
 
-            # 通过查找哈希表得到 <mr, mi>，然后把<sr, si>和<mr, mi>统一到同一个坐标系 得到Tmg Tsg
-            # 以及Alpha  （mi与si之间的夹角）
+                # 通过查找哈希表得到 <mr, mi>，然后把<sr, si>和<mr, mi>统一到同一个坐标系 得到Tmg Tsg
+                # 以及Alpha  （mi与si之间的夹角）
 
-            # print(ppf_vec)
-            key_temp = str(ppf_vec)
-            # value_temp = [i, j]
+                # print(ppf_vec)
+                key_temp = str(ppf_vec)
+                # value_temp = [i, j]
 
-            # 将特征push到hash
-            if key_temp in hash_table.keys():
-                # print('已经存在')
-                # 取出并进行匹配投票
-                match_pair = hash_table[key_temp]
-                # print('match_pair:', match_pair)
+                # 将特征push到hash
+                if key_temp in hash_table.keys():
+                    # print('已经存在')
+                    # 取出并进行匹配投票
+                    match_pair = hash_table[key_temp]
+                    # print('match_pair:', match_pair)
 
-                # 投票  这里哈系表已经完成了历史使命，接下来交给坐标变换
-                for pair in match_pair:
-                    # 拿出每一个匹配到的点对
-                    # 由于保存的是索引，所以需要从模型上查找到对应的点对信息
-                    # 1.将mr与sr对齐到公共坐标系
-                    Tmg = pcd_np[pair[0]]  # mr的索引
-                    Tsg = pt_i
-                    print(Tmg - Tsg)  # 开心的是，这里面已经能够检测出真实的平移变换
+                    # 投票  这里哈系表已经完成了历史使命，接下来交给坐标变换
+                    for pair in match_pair:
+                        # 拿出每一个匹配到的点对
+                        # 由于保存的是索引，所以需要从模型上查找到对应的点对信息
+                        # 1.将mr与sr对齐到公共坐标系
+                        mr = pcd_np[pair[0]]  # 模型参考点mr
+                        mi = pcd_np[pair[1]]
+                        mr_n = pcd_normal[pair[0]]
 
-                    # 接下来就是求alpha
-                    vote_table[i][alpha] += 1  # 投票
+                        sr = pt_i  # 场景参考点sr
+                        si = pt_j
+                        sr_n = pt_i_n
+                        # print(Tmg - Tsg)  # 开心的是，这里面已经能够检测出真实的平移变换
+
+                        # 接下来就是求alpha
+                        # 用到了<mr_n, mi, sr_n, si>
+                        # vote_table[i][alpha] += 1  # 投票
+                        alpha = get_alpha(mr, mi, mr_n, sr, si, sr_n) + 180  # 这一步太慢了! 先跑出来看看吧
+
+                        alpha = int(alpha / a_step)  # 离散化 取整
+                        if alpha >= a_col:
+                            alpha = a_col-1
+
+                        # print(alpha)
+
+                        # 投票
+                        vote_table[i][alpha] += 1
+        print('rate: {0:.3f}'.format(i/num_pts_scene_r))
+    print('vote_table:\n', vote_table)
+    savetxt('vote_table.txt', vote_table)
+
+    # 从table中找到可靠的局部坐标系
+    # get pose
+
+    e_time = time.time()
+
+    print('time cost: {0:.3f} s'.format(e_time - s_time))
+
+    # 将模型变换,看结果是否正确
 
     o3d.visualization.draw_geometries([pcd,
                                        pcd2,

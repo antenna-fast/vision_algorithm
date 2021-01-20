@@ -21,9 +21,6 @@ noise_mode = 1  # 0 for vstack and 1 for jatter
 noise_rate = 0.01  # 噪声占比
 scale_ratio = 1  # 尺度
 
-# 加噪声
-# 不加噪声 100%重复
-
 # 加载 2
 pcd_trans = array(pcd.points) * scale_ratio  # nx3
 
@@ -106,18 +103,22 @@ pts_num = len(pcd.points)
 threshold = 0.5
 
 i = 6992  # xiongxiong
-# i = 3511  # 耳朵尖  ear
+# i = 3511  # 耳朵尖  ear  6115
 # i = 2314  # 脚尖
-i = 8805  # 鼻子  可以  nose
+i = 8805  # 鼻子  可以  nose  1937
 # i = 621  # 胯部
 # i = 5460  # test
 i = 1671  # test
 # i = 1343  # test
+i = 11223  # Knee
+i = 6115  # 耳朵
+i = 8597
 
-idx_list = [1671, 8805, 3511]
-part_map = {3511: 'Ear', 2314: 'Tiptoe', 8805: 'Nose', 621: '', 6992: 'Belly',
-            5460: 'Knee',
-            i: 'Test'
+# idx_list = [1671, 8805, 3511]  # 耳朵和鼻子很像
+idx_list = [i]  # 耳朵和鼻子很像
+part_map = {6115: 'Ear', 2314: 'Tiptoe', 1937: 'Nose', 621: '', 8597: 'Belly',
+            11223: 'Knee',
+            # i: 'Test'
             }
 
 # 模型1
@@ -232,6 +233,7 @@ for i in idx_list:
              'size': 13,
              }
     plt.title(part_map[i], font1)
+    # plt.axis('off')  # 关闭坐标轴
 
     plt.show()
 
