@@ -111,8 +111,8 @@ i = 8805  # 鼻子  可以  nose  1937
 i = 1671  # test
 # i = 1343  # test
 i = 11223  # Knee
-i = 6115  # 耳朵
-i = 8597
+# i = 6115  # 耳朵
+# i = 8597
 
 # idx_list = [1671, 8805, 3511]  # 耳朵和鼻子很像
 idx_list = [i]  # 耳朵和鼻子很像
@@ -184,15 +184,20 @@ for i in idx_list:
         angle_buff.append(n_fn_angle)
 
     # print(n_fn_angle_buff_1)
+    n_fn_angle_1 = n_fn_angle_1/sum(n_fn_angle_1)
     for vic_ang_1 in n_fn_angle_buff_1:
         # kl
         # print(len(vic_ang_1))
-        vic_ang_1 = sort(vic_ang_1)  # 规定长度
+        # vic_ang_1 = sort(vic_ang_1)  # 规定长度
+        vic_ang_1 = vic_ang_1/sum(vic_ang_1)
+        # print('vic_ang_1:', vic_ang_1)
+        # print('n_fn_angle_1', n_fn_angle_1)
         kl_loss = get_KL(vic_ang_1, n_fn_angle_1, cut_num)  # vec1, vec2, vec_len
 
         # print(kl_loss)
         kl_buff.append(kl_loss)
-
+    kl_buff = sort(kl_buff)
+    print('kl_buff:', kl_buff)
     kl_buff = array(kl_buff)
     # sum_var = var(var_buff)
     # 使用排序
@@ -213,6 +218,11 @@ for i in idx_list:
     row_num = len(angle_buff)
     print('x_line:', x_line)
 
+    font1 = {'family': 'Times New Roman',
+             'weight': 'normal',
+             'size': 13,
+             }
+
     # 水平刻度
     for y_line in arange(0, 1, 0.1):
         plt.hlines(y_line, 1, x_num, colors="gray", linestyles="dashed")  # x, ymin, ymax
@@ -222,105 +232,27 @@ for i in idx_list:
     marker_map = {0: 'o', 1: '*', 2: '^', 3: 'x', 4: 'v', 5: 's', 6: 'p', 7: '+'}
     color_map = {}
     for row in range(row_num):
-        plt.plot(x_line, angle_buff[row])
+        plt.plot(x_line, angle_buff[row], label=str(row) + ' ring')
         plt.scatter(x_line, angle_buff[row], marker=marker_map[row])
 
     # x坐标轴设置整数
     plt.xticks(x_line)
 
-    font1 = {'family': 'Times New Roman',
-             'weight': 'normal',
-             'size': 13,
-             }
     plt.title(part_map[i], font1)
     # plt.axis('off')  # 关闭坐标轴
-
+    plt.legend(prop=font1, loc=4)  # 设置legend的字体
     plt.show()
 
     # 可视化KL
     # print('kl_buff:', kl_buff)
     # # savetxt('../save_file/kl_buff_' + str(pick_idx) + '.txt', kl_buff)
-    # savetxt('../save_file/kl_buff_' + str(pick_idx) + '.txt', kl_buff)
+    savetxt('../save_file/kl_buff_' + str(pick_idx) + '.txt', kl_buff)
     #
     # x_line = list(range(len(kl_buff)))
     # plt.plot(x_line, kl_buff)
     #
     # plt.show()
 
-#
-# # 变换后  模型2
-# key_pts_buff_2 = []
-#
-# # if 1:
-# for i in range(pts_num):
-#
-#     # print("Paint the 1500th point red.")
-#     pick_idx = i
-#
-#     # 一环
-#     # 一环上构造一个 特征向量
-#     # print("Find its nearest neighbors, and paint them blue.")
-#     [k, idx_2, _] = pcd_tree_2.search_knn_vector_3d(pcd2.points[pick_idx], vici_num)
-#     vici_idx_2 = idx_2[1:]
-#     # asarray(pcd.colors)[vici_idx_2, :] = [0, 0, 1]
-#
-#     now_pt_2 = array(pcd2.points)[i]
-#     vici_pts_2 = array(pcd2.points)[vici_idx_2]
-#     # all_pts = array(pcd2.points)[idx_2]
-#     mesh2, mesh_normals, vtx_normal = get_mesh(now_pt_2, vici_pts_2)
-#
-#     # 构建一环的特征
-#     n_fn_angle_2 = []
-#     for f_normal in mesh_normals:
-#         ang = get_cos_dist(f_normal, vtx_normal)  # 两个向量的余弦值
-#         n_fn_angle_2.append(ang)
-#         # print(ang)
-#
-#     n_fn_angle_2 = sort(array(n_fn_angle_2))[:cut_num]  # 规定长度   先排序
-#     # print(n_fn_angle_2)
-#
-#     # 二环
-#     var_buff = []
-#     n_fn_angle_buff_2 = []
-#
-#     for now_pt_2r in vici_idx_2:  # 比较二环与中心环的区别
-#         now_pt_2_2 = array(pcd2.points[now_pt_2r])  # 每一个邻域的相对中心点
-#
-#         # 搜索二环 邻域
-#         [k, idx_2_2, _] = pcd_tree_2.search_knn_vector_3d(pcd2.points[now_pt_2r], vici_num)
-#         vici_idx_2_2 = idx_2_2[1:]
-#         vici_pts_2_2 = array(pcd2.points)[vici_idx_2_2]
-#
-#         mesh2, mesh_normals, vtx_normal = get_mesh(now_pt_2_2, vici_pts_2_2)
-#
-#         # 二环角度向量
-#         n_fn_angle = []
-#         for f_normal in mesh_normals:
-#             ang = get_cos_dist(f_normal, vtx_normal)  # 两个向量的余弦值
-#             n_fn_angle.append(ang)
-#             # print(ang)
-#         # print('angle:', n_fn_angle)
-#         n_fn_angle_buff_2.append(n_fn_angle)
-#
-#     for vic_ang_2 in n_fn_angle_buff_2:
-#         # kl
-#         vic_ang_2 = sort(vic_ang_2)[:cut_num]  # 规定长度
-#         kl_loss = get_KL(vic_ang_2, n_fn_angle_2, cut_num)  # vec1, vec2, vec_len
-#
-#         var_buff.append(kl_loss)
-#
-#     var_buff = array(var_buff)
-#     sum_var = var(var_buff)
-#     # print('sum_var2:', sum_var)
-#
-#     if sum_var > threshold:
-#         pcd2.colors[pick_idx] = [1, 0, 0]  # 选一个点
-#         key_pts_buff_2.append(now_pt_2)
-#
-#
-# key_pts_buff_2 = array(key_pts_buff_2)
-#
-# savetxt('save_file/key_pts_buff_2_' + str(noise_rate) + '.txt', key_pts_buff_2)
 
 # axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=8, origin=[0, 0, 0])
 # 查看选的点是否正确

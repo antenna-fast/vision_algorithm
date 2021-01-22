@@ -1,12 +1,4 @@
-import open3d as o3d
-
-from base_trans import *
-from n_pt_plane import *
-
-from scipy.spatial import Delaunay
-
 from o3d_impl import *
-
 
 # 加载 1
 pcd = o3d.io.read_point_cloud('../data_ply/Armadillo.ply')

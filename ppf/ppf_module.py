@@ -216,11 +216,19 @@ if __name__ == '__main__':
                         # 投票
                         vote_table[i][alpha] += 1
         print('rate: {0:.3f}'.format(i/num_pts_scene_r))
-    print('vote_table:\n', vote_table)
+
+    # print('vote_table:\n', vote_table)
     savetxt('vote_table.txt', vote_table)
+
+    vote_max = np.max(vote_table)
+    print('vote_max:\n', vote_max)
+
+    vote_max_id = np.where(vote_max == vote_table)
+    print('vote_max_id:', vote_max_id)
 
     # 从table中找到可靠的局部坐标系
     # get pose
+    # s_pose = get_pose()  # alpha_mi, rot_axis_mr_1, theta_mr_1, alpha_si, rot_axis_sr_1, theta_sr_1
 
     e_time = time.time()
 

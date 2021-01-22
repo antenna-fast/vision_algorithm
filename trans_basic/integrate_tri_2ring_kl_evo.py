@@ -1,7 +1,3 @@
-from numpy import *
-from numpy.linalg import *
-import open3d as o3d
-
 from dist import *  # 距离计算
 from o3d_impl import *  # mesh处理  可视化
 

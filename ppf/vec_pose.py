@@ -1,9 +1,23 @@
 from numpy import *
+import numpy as np
 from numpy.linalg import *
 from scipy.spatial.transform import Rotation as R
 import scipy
 
 from transform import *
+
+
+# 找到二维arg索引
+def get_idx_2d(a):
+    max_ele = np.max(a)
+    idx = np.where(a == max_ele)
+    return idx[0], idx[1]
+
+
+a = array([[1, 2],
+           [4, 4]])
+
+print(get_idx_2d(a))
 
 
 # 反对称阵
@@ -67,16 +81,15 @@ def from_rodri_to_mat(k, theta):
     # 参考：CHAPTER 9. ROTATION ABOUT AN ARBITRARY AXIS
     k_T = k[:, newaxis]
     k_vec = k.reshape(1, 3)
-    R = eye(3)*cos(theta) + (1-cos(theta))*dot(k_T, k_vec) + sin(theta)*K
+    R = eye(3) * cos(theta) + (1 - cos(theta)) * dot(k_T, k_vec) + sin(theta) * K
 
     return R
 
 
 def get_alpha(mr, mi, mr_n, sr, si, sr_n):
-
     # Tmg:
     Tmg = -mr  # 参考点  mr
-    Tsg = -sr   # sr
+    Tsg = -sr  # sr
     # print(Tsg - Tmg)
 
     # 将模型点和场景参考点变换到统一坐标系
@@ -105,14 +118,6 @@ def get_alpha(mr, mi, mr_n, sr, si, sr_n):
     mi_rot = get_rodrigues(pt_m_2, theta_mr_1, rot_axis_mr_1)
     # print('mi_rot after ok：', mi_rot)  #
 
-    # ****************************#  OKOKOKOKOK  轴角转旋转矩阵
-    # res = from_rodri_to_mat(rot_axis, theta_mg)  # 轴角->mat  有问题
-    # print('res:\n', res)
-    # # # 检验是否正确：使用res dot v，看是否等于v_rot 结果一样！  1.20 发现是向量点乘要确定维度！ 从公式出发解决的
-    # mi_rot = dot(res, pt_m_2)  # 不对
-    # print('mi_rot que:', mi_rot)
-    # ****************************#  OKOKOKOKOK
-
     ############# 场景点 根据法向量变换
     theta_sr_1, rot_axis_sr_1 = get_ang_3d(sr_n, x_axis)  # 旋转角  根据法向量
     # print('theta_sr_1:', theta_sr_1)
@@ -140,7 +145,6 @@ def get_alpha(mr, mi, mr_n, sr, si, sr_n):
 
 
 def get_pose(alpha_mi, rot_axis_mr_1, theta_mr_1, alpha_si, rot_axis_sr_1, theta_sr_1):
-
     r_mat_alpha_mi = rot_x(alpha_mi)  # OK
     # print('r_mat_alpha:\n', r_mat_alpha_mi)  #
 
@@ -261,4 +265,3 @@ if __name__ == '__main__':
     # pose_s = dot(R_inv_temp, R_m_temp)
     # print('pose_s:\n', pose_s)  # 场景相对于模型的位姿
     # #############
-

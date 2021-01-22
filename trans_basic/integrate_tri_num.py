@@ -26,7 +26,6 @@ print(diameter)
 
 # 定义变换
 r = R.from_rotvec(pi / 180 * array([30, 60, 30]))  # 角度->弧度
-# r = R.from_rotvec(pi / 180 * array([0, 0, 10]))  # 角度->弧度
 r_mat = r.as_matrix()
 t_vect = array([150, -2, -8], dtype='float')
 print('r_mat:\n', r_mat)

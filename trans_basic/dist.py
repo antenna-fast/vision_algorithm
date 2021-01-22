@@ -23,14 +23,19 @@ def get_cos_dist(vec1, vec2):
 
 # KL散度  非对称
 def get_KL(vec1, vec2, vec_len):
-    # vec1 = (vec1+1)/2
-    # vec2 = (vec2+1)/2
-
     dist = 0
     for i in range(vec_len):
         dist += vec1[i] * log2(vec1[i] / vec2[i])
     # dist = sum()
     return dist
+
+
+# # test kl  非负：P>Q即可
+# a = array([0.1, 0.1, 0.3, 0.4])
+# b = array([0.1, 0.9, 0.7, 0.6])
+# a = a/sum(a)
+# b = b/sum(b)
+# print('kl:', get_KL(a, b, 4))
 
 
 # 输入一个序列  输出是否不平衡

@@ -164,19 +164,3 @@ if __name__ == '__main__':
 
     repeat_buff = array(repeat_buff)
     savetxt('../save_file/repeat_buff.txt', repeat_buff)
-
-        # axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=8, origin=[0, 0, 0])
-        #
-        # o3d.visualization.draw_geometries([pcd,
-        #                                    pcd2,
-        #                                    axis_pcd,
-        #                                    # mesh1,
-        #                                    # mesh2
-        #                                    ],
-        #                                   window_name='ANTenna3D',
-        #                                   # zoom=0.3412,
-        #                                   # front=[0.4257, -0.2125, -0.8795],
-        #                                   # lookat=[2.6172, 2.0475, 1.532],
-        #                                   # up=[-0.0694, -0.9768, 0.2024]
-        #                                   # point_show_normal=True
-        #                                   )

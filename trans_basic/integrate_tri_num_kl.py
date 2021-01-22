@@ -1,7 +1,3 @@
-import open3d as o3d
-
-from module_test.point_to_plane_test import pt_to_plan  # px, p, p_n  返回投影后的三维点
-from base_trans import *
 from dist import *  # 距离计算
 from o3d_impl import *
 
@@ -40,7 +36,6 @@ pcd_trans = pcd_trans + t_vect
 # 加噪声
 
 noise_mode = 2  # 0 for vstack and 1 for jitter
-
 noise_rate = 0.1  # 噪声占比
 
 mean = array([1, 0, 1])

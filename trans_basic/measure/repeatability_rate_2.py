@@ -5,7 +5,6 @@ import open3d as o3d
 from base_trans import *
 from dist import *  # 距离计算
 
-from scipy.spatial import Delaunay
 
 # 关键点用来评估检测算法对变换的鲁棒性
 
@@ -198,19 +197,3 @@ if __name__ == '__main__':
     ra = get_repeate_rate_2(key_pts_buff_1, key_pts_buff_2, r_mat, t_vect)  # pcd_np_1, pcd_np_2, r_mat, t_vect
 
     print('重复率', ra)
-
-    axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=8, origin=[0, 0, 0])
-
-    # o3d.visualization.draw_geometries([pcd,
-    #                                    pcd2,
-    #                                    axis_pcd,
-    #                                    # mesh1,
-    #                                    # mesh2
-    #                                    ],
-    #                                   window_name='ANTenna3D',
-    #                                   # zoom=0.3412,
-    #                                   # front=[0.4257, -0.2125, -0.8795],
-    #                                   # lookat=[2.6172, 2.0475, 1.532],
-    #                                   # up=[-0.0694, -0.9768, 0.2024]
-    #                                   # point_show_normal=True
-    #                                   )

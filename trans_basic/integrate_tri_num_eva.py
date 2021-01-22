@@ -1,11 +1,6 @@
-import open3d as o3d
-
-from base_trans import *
-from n_pt_plane import *
 from dist import *  # 距离计算
-
 from o3d_impl import *
-from scipy.spatial import Delaunay
+
 
 # 加载 1
 pcd = o3d.io.read_point_cloud('../data_ply/Armadillo.ply')

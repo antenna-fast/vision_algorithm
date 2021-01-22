@@ -1,7 +1,3 @@
-from numpy import *
-from numpy.linalg import *
-import open3d as o3d
-
 from o3d_impl import *
 from base_trans import *
 from dist import *  # 距离计算
@@ -15,12 +11,11 @@ pcd.paint_uniform_color([0.0, 0.5, 0.1])
 # 构建搜索树
 pcd_tree_1 = o3d.geometry.KDTreeFlann(pcd)
 
-noise_mode = 1  # 0 for vstack and 1 for jatter
-noise_rate = 0.01  # 噪声占比
-scale_ratio = 1  # 尺度
 
 # 加噪声
-# 不加噪声 100%重复
+scale_ratio = 1
+noise_mode = 2  # 0 for vstack and 1 for jatter
+noise_rate = 0.07  # 噪声占比  不同的噪声占比生成不同的关键点文件
 
 # 加载 2
 pcd_trans = array(pcd.points) * scale_ratio  # nx3
@@ -34,13 +29,6 @@ print('r_mat:\n', r_mat)
 
 pcd_trans = dot(r_mat, pcd_trans.T).T
 pcd_trans = pcd_trans + t_vect
-
-
-# 加噪声
-
-noise_mode = 2  # 0 for vstack and 1 for jatter
-
-noise_rate = 0.07  # 噪声占比
 
 
 if noise_mode == 0:
@@ -88,33 +76,9 @@ pcd2.paint_uniform_color([0.0, 0.5, 0.1])
 pcd_tree_2 = o3d.geometry.KDTreeFlann(pcd2)
 
 
-print('pcd1_num:', len(pcd.points))
-print('pcd2_num:', len(pcd2.points))
-
-# 可视化待检测数据
-
-# axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=8, origin=[0, 0, 0])
-# o3d.visualization.draw_geometries([pcd,
-#                                    # pcd2,
-#                                    axis_pcd,
-#                                    # mesh1,
-#                                    # mesh2
-#                                    ],
-#                                   window_name='ANTenna3D',
-#                                   # zoom=0.3412,
-#                                   # front=[0.4257, -0.2125, -0.8795],
-#                                   # lookat=[2.6172, 2.0475, 1.532],
-#                                   # up=[-0.0694, -0.9768, 0.2024]
-#                                   # point_show_normal=True
-#                                   )
-
-
-# 遍历
-
 # 找到邻域
 # 输入当前点 邻域
 # 输出: mesh, mesh_normals, normal
-histo = {}
 
 vici_num = 7
 cut_num = 5
@@ -128,7 +92,6 @@ i = 150
 key_pts_buff_1 = []
 for i in range(pts_num):
 # if 1:
-    # print("Paint the 1500th point red.")
     pick_idx = i
 
     # 一环
@@ -173,7 +136,6 @@ for i in range(pts_num):
             # ang = arccos(dot(f_normal, vtx_normal) / (linalg.norm(f_normal) * linalg.norm(vtx_normal)))
             ang = get_cos_dist(f_normal, vtx_normal)  # 两个向量的余弦值
             n_fn_angle.append(ang)
-            # print(ang)
 
         # print('angle:', n_fn_angle)
         n_fn_angle_buff_1.append(n_fn_angle)
@@ -192,11 +154,9 @@ for i in range(pts_num):
     # sum_var = var(var_buff)
     res = get_unbalance(kl_buff, threshold)  # 不平衡点
 
-    # if sum_var > threshold:
     if res:
         pcd.colors[pick_idx] = [1, 0, 0]  # 选一个点
         key_pts_buff_1.append(now_pt_1)
-
 
 savetxt('save_file/key_pts_buff_1_' + str(noise_rate) + '.txt', key_pts_buff_1)
 
@@ -205,8 +165,6 @@ key_pts_buff_2 = []
 
 # if 1:
 for i in range(pts_num):
-
-    # print("Paint the 1500th point red.")
     pick_idx = i
 
     # 一环
@@ -266,7 +224,6 @@ for i in range(pts_num):
     # sum_var = var(var_buff)
     # print('sum_var2:', sum_var)
 
-    # if sum_var > threshold:
     if res:
         pcd2.colors[pick_idx] = [1, 0, 0]  # 选一个点
         key_pts_buff_2.append(now_pt_2)
