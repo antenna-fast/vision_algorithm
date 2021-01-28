@@ -8,6 +8,10 @@ text_2 = 'Hi, you are good man'
 
 
 if __name__ == '__main__':
-    print()
 
     words_dict = {}
+
+    list_1 = text_1.split()
+    list_2 = text_2.split()
+
+    print(list_2)

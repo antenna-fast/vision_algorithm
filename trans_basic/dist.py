@@ -24,7 +24,7 @@ def get_cos_dist(vec1, vec2):
 # KL散度  非对称
 def get_KL(vec1, vec2, vec_len):
     dist = 0
-    for i in range(vec_len):
+    for i in range(vec_len):  # 如果有等于0的
         dist += vec1[i] * log2(vec1[i] / vec2[i])
     # dist = sum()
     return dist

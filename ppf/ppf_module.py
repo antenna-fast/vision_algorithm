@@ -18,7 +18,12 @@ import time
 # 计算夹角  注意 这个会导致不稳定，opencv建议使用 arctan?
 # 原理：向量内积的几何意义：向量a在b上的投影
 def get_ang(vec_1, vec_2):
-    theta = arccos(dot(vec_1, vec_2) / (norm(vec_1) * norm(vec_2))) * 180 / pi
+    dist = dot(vec_1, vec_2) / (norm(vec_1) * norm(vec_2))
+
+    if dist > 1:  # 由于精度损失 可能会略微大于1 此时无解
+        dist = 1
+
+    theta = arccos(dist) * 180 / pi
     return theta
 
 
@@ -43,7 +48,7 @@ def get_ppf(pt1, pt2, n1, n2):
 # c = np.cross(a, b)
 # print(c)
 
-train = 0
+train = 1
 
 if __name__ == '__main__':
     # 加载数据
@@ -53,9 +58,7 @@ if __name__ == '__main__':
     pcd.paint_uniform_color([0.0, 0.5, 0.5])
 
     axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=15, origin=[0, 0, 0])
-    # print("Downsample the point cloud with a voxel of 0.05")
     pcd = pcd.voxel_down_sample(voxel_size=10)
-    # print("Recompute the normal of the downsampled point cloud")
     pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=8, max_nn=10))
 
     pcd_np = array(pcd.points)
@@ -63,11 +66,10 @@ if __name__ == '__main__':
 
     pts_num = len(pcd_np)  # 模型的点数
 
-    # 制作场景
+    # 制作场景  暂时只给定变换
     pcd_trans = array(pcd.points)  # nx3
     # pcd_trans = dot(r_mat, pcd_trans.T).T
     pcd_trans = pcd_trans + array([130, 0, 0])
-    # pcd_trans = pcd_trans + array([0.2, 0, 0])
 
     pcd2 = o3d.geometry.PointCloud()
     pcd2.points = o3d.utility.Vector3dVector(pcd_trans)
@@ -76,22 +78,19 @@ if __name__ == '__main__':
     pcd2.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=8, max_nn=10))
     pcd2.paint_uniform_color([0.0, 0.8, 0.5])
 
-    # 以索引进行保存
-
     # 从构建pcd1 线下构建
-    # pick one point
 
     # compare it with any other points
     # computer PPF
     # 离散化并向下取整 然后把点对索引聚类  点对特征相似的，聚集在一起
     # 保存
-
     # 全据特征描述是从PPF特征描述到模型的映射
 
     # PPF参数设定
     d_step = 5
     a_step = 10
 
+    # 训练
     if train:
         # 建立哈系表
         hash_table = {}
@@ -105,14 +104,14 @@ if __name__ == '__main__':
                     pt_j_n = pcd_normal[j]
 
                     # print('n: {0}  {1}'.format(pt_i_n, pt_j_n))
-                    # 计算<mi, mj>的PPF
+                    # 计算<mi, mj>的PPF  为了得到匹配的点
                     ppf_vec = get_ppf(pt_i, pt_j, pt_i_n, pt_j_n)  # pt1, pt2, n1, n2
 
                     # PPF离散化
                     ppf_vec[0] = (ppf_vec[0] / d_step).astype(int)
                     ppf_vec[1:] = (ppf_vec[1:] / a_step).astype(int)
-
                     # print(ppf_vec)
+
                     key_temp = str(ppf_vec)
                     value_temp = [i, j]
 
@@ -131,16 +130,12 @@ if __name__ == '__main__':
         # 还要保存计算好的Alpha等参数
 
     # 以pcd2作为场景 线上匹配
-    # 先选定一系列参考点
-    # 其他所有的点和参考点 进行计算点对特征
+    # 先选定一系列参考点,其他所有的点和参考点 进行计算点对特征
     # 这些特征与模型的全局描述进行匹配？ 每一个潜在的匹配 投票位姿（相对于参考点）
 
     # 加载hash table
-
     s_time = time.time()
-
     hash_table = load('hash_table.npy', allow_pickle=True).item()
-    # print(hash_table)
     # print(hash_table)
 
     # 场景中的所有点
@@ -148,20 +143,25 @@ if __name__ == '__main__':
     scene_pts_n = array(pcd2.normals)
     num_scene_pts = len(scene_pts)
 
-    # 首先对场景进行采样，得到参考点
-    pcd2_r = pcd2.voxel_down_sample(voxel_size=10)
-    pcd2_r.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=11, max_nn=10))
+    # 首先对场景进行采样，得到参考点  既然经过了下采样，其实不一定每个点都落在模型上
+    # pcd2_r = pcd2.voxel_down_sample(voxel_size=15)
+    pcd2_r = pcd2
+    pcd2_r.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=10, max_nn=10))
 
     scene_pts_r = array(pcd2_r.points)
     scene_pts_r_n = array(pcd2_r.normals)
     num_pts_scene_r = len(scene_pts_r)
+    print('num_scene_pts:', num_scene_pts)
+    print('num_pts_scene_r:', num_pts_scene_r)
 
     # 投票表
-    a_col = int(360 / a_step)
+    a_col = int(360 / a_step)  # 如果遇到360度,直接使用之作为索引就不行 需要+1
     # print('a_col:', a_col)  #
-    vote_table = zeros((num_pts_scene_r, a_col))  # 行：参考点个数  列：角度采样
 
-    for i in range(num_pts_scene_r):  # 参考点对其他所有点的特征
+    vote_table = zeros((num_pts_scene_r, a_col+1))  # 行：参考点个数  列：角度采样 0-360/step都包含
+    pose_table = zeros((num_pts_scene_r, a_col+1, 3))  # 先只保存平移量，看出来的对不对，如果平移对了我再加上旋转。
+
+    for i in range(num_pts_scene_r):  # 参考点对其他所有点的特征  注意 采样后参考点可能根本就不在模型上了
         pt_i = scene_pts_r[i]  # 参考点
         pt_i_n = scene_pts_r_n[i]
         for j in range(num_scene_pts):
@@ -204,18 +204,23 @@ if __name__ == '__main__':
 
                         # 接下来就是求alpha
                         # 用到了<mr_n, mi, sr_n, si>
-                        # vote_table[i][alpha] += 1  # 投票
-                        alpha = get_alpha(mr, mi, mr_n, sr, si, sr_n) + 180  # 这一步太慢了! 先跑出来看看吧
+
+                        # 这里面的模型夹角可以放在前面，用来提速
+                        # 后面+了180，这是在相对角度差上面加的，已经不是真实的了！
+                        # 只是为了投票
+                        alpha = get_alpha(mr, mi, mr_n, sr, si, sr_n) #+ 180  # 这一步太慢了! 先跑出来看看吧
 
                         alpha = int(alpha / a_step)  # 离散化 取整
-                        if alpha >= a_col:
-                            alpha = a_col-1
+                        # if alpha >= a_col:
+                        #     alpha = a_col - 1
 
-                        # print(alpha)
+                        # print('alpha:', alpha)
 
                         # 投票
                         vote_table[i][alpha] += 1
-        print('rate: {0:.3f}'.format(i/num_pts_scene_r))
+                        pose_table[i][alpha] += mr - sr  # 每次得到的都是不一样的
+
+        print('rate: {0:.3f}'.format(i / num_pts_scene_r))
 
     # print('vote_table:\n', vote_table)
     savetxt('vote_table.txt', vote_table)
@@ -224,7 +229,10 @@ if __name__ == '__main__':
     print('vote_max:\n', vote_max)
 
     vote_max_id = np.where(vote_max == vote_table)
-    print('vote_max_id:', vote_max_id)
+    print('vote_max_id:', vote_max_id)  # (array([48], array([35])  alpha超过了
+
+    x_id, y_id = vote_max_id[0], vote_max_id[1]  #
+    print('pose_table_max:', pose_table[x_id][y_id] / vote_table[x_id][y_id])
 
     # 从table中找到可靠的局部坐标系
     # get pose

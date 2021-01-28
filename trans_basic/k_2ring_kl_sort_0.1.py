@@ -12,6 +12,11 @@ pcd.paint_uniform_color([0.0, 0.5, 0.1])
 # 构建搜索树
 pcd_tree_1 = o3d.geometry.KDTreeFlann(pcd)
 
+# o3d.io.write_point_cloud("D:/pcd_share/pcd_1_01.ply", pcd)
+# o3d.io.write_point_cloud("D:/pcd_share/pcd_1_01.pcd", pcd)
+
+# o3d.io.write_point_cloud('a.ply', pcd)
+
 # 参数
 vici_num = 9  # vici_num - 1
 cut_num = vici_num-2
@@ -75,14 +80,14 @@ else:
 pcd2 = o3d.geometry.PointCloud()
 pcd2.points = o3d.utility.Vector3dVector(pcd_trans)
 
-# print("Recompute the normal of the downsampled point cloud")
 pcd2.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=8, max_nn=10))
 pcd2.paint_uniform_color([0.0, 0.5, 0.1])
 # pcd_trans_normal = array(pcd2.normals)
 
 # 构建搜索树
 pcd_tree_2 = o3d.geometry.KDTreeFlann(pcd2)
-
+# o3d.io.write_point_cloud('D:/pcd_share/pcd_2_01.ply', pcd2)
+# o3d.io.write_point_cloud('D:/pcd_share/pcd_2_01.pcd', pcd2)
 
 i = 150
 # 模型1

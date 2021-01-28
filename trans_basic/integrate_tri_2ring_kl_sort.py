@@ -4,10 +4,16 @@ from dist import *  # 距离计算
 
 
 # 加载 1
-pcd = o3d.io.read_point_cloud('../data_ply/Armadillo.ply')
-pcd = pcd.voxel_down_sample(voxel_size=3)
+# pcd = o3d.io.read_point_cloud('../data_ply/Armadillo.ply')
+pcd = o3d.io.read_point_cloud('../data_ply/1.ply')
+# pcd = o3d.io.read_point_cloud('D:/SIA/科研/data/unzip_1/antsPly/1.ply')
+print(pcd)
+pcd = pcd.voxel_down_sample(voxel_size=2)
+print(pcd)
 pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=8, max_nn=10))
-pcd.paint_uniform_color([0.0, 0.5, 0.1])
+# pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.8, max_nn=10))
+# pcd.paint_uniform_color([0.0, 0.5, 0.1])
+pcd.paint_uniform_color([0.6, 0.6, 0.0])
 # 构建搜索树
 pcd_tree_1 = o3d.geometry.KDTreeFlann(pcd)
 
@@ -69,6 +75,7 @@ pcd2.points = o3d.utility.Vector3dVector(pcd_trans)
 
 # print("Recompute the normal of the downsampled point cloud")
 pcd2.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=8, max_nn=10))
+# pcd2.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.8, max_nn=10))
 pcd2.paint_uniform_color([0.0, 0.5, 0.1])
 # pcd_trans_normal = array(pcd2.normals)
 
@@ -81,11 +88,11 @@ pcd_tree_2 = o3d.geometry.KDTreeFlann(pcd2)
 # 输出: mesh, mesh_normals, normal
 
 vici_num = 7
-cut_num = 5
+cut_num = 3
 
 pts_num = len(pcd.points)
 
-threshold = 0.7
+threshold = 2.9
 
 i = 150
 # 模型1
@@ -94,8 +101,7 @@ for i in range(pts_num):
 # if 1:
     pick_idx = i
 
-    # 一环
-    # 一环上构造一个 特征向量
+    # 一环上构造一个特征向量
     # print("Find its nearest neighbors, and paint them blue.")
     [k, idx_1, _] = pcd_tree_1.search_knn_vector_3d(pcd.points[pick_idx], vici_num)
     vici_idx_1 = idx_1[1:]

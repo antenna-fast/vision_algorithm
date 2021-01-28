@@ -7,17 +7,15 @@ import scipy
 from transform import *
 
 
-# 找到二维arg索引
-def get_idx_2d(a):
+# # 定义一些常数
+rad2deg = 180 / pi
+
+
+# 找到二维argmax索引
+def get_max_idx_2d(a):
     max_ele = np.max(a)
     idx = np.where(a == max_ele)
-    return idx[0], idx[1]
-
-
-a = array([[1, 2],
-           [4, 4]])
-
-print(get_idx_2d(a))
+    return idx[0][0], idx[1][0]  # 如果有多个相同的最大值，只返回其中的一个
 
 
 # 反对称阵
@@ -29,18 +27,31 @@ def get_anti_sym(vec):
 
 
 # 2d里面 叉乘之后 逆时针是正的
-def get_ang_2d(vec1, vec2):  # vec1 起始向量，vec2 终止向量
+def get_ang_2d(vec2, vec1):  # vec1 起始向量，vec2 终止向量
     dist = dot(vec1, vec2) / (norm(vec1) * norm(vec2))  # 小夹角 接近于1
 
     if dist > 1:  # 由于精度损失 可能会略微大于1 此时无解
         dist = 1
 
     # print('dist:', dist)
-    ang = arccos(dist) * 180 / pi  # 转为角度
+    ang = arccos(dist) * rad2deg  # 转为角度
     if ang != 180:  # 共线的时候 叉积等于0 无法使用
-        ang = ang * cross(vec1, vec2)
+        ang = ang * sign(cross(vec1, vec2))
 
     return ang
+
+
+def get_ang_2d_tan(a, b):  #
+    ang = arctan2(a, b)
+    ang = ang * rad2deg
+    return ang
+
+
+# test
+a = [1, 1]
+b = [1, 0]
+a = get_ang_2d(a, b)  # 1目标向量  2参考向量  a相对于b的
+print('ang:', a)
 
 
 # 轴角
@@ -93,7 +104,7 @@ def get_alpha(mr, mi, mr_n, sr, si, sr_n):
     # print(Tsg - Tmg)
 
     # 将模型点和场景参考点变换到统一坐标系
-    # pt_m_1 = mr + Tmg  # 变换后的参考点  好像没用到
+    # pt_m_1 = mr + Tmg  # 变换后的参考点  好像没用到  总是0
     pt_m_2 = mi + Tmg
     # print('pt_m_1, pt_m_2:', pt_m_1, pt_m_2)
 
@@ -134,9 +145,10 @@ def get_alpha(mr, mi, mr_n, sr, si, sr_n):
     # print('mi_rot:', mi_rot)
     # print('si_rot:', si_rot)
 
-    alpha_ref_axis = array([1, 0])  # alpha的参考轴
-    alpha_mi = get_ang_2d(mi_rot, alpha_ref_axis)  # 这里不知道正负？？这里已经知道正负
-    alpha_si = get_ang_2d(si_rot, alpha_ref_axis)  # 这里不知道正负？？这里已经知道正负
+    # 求错了 既然是和x轴的夹角，怎么能再用x轴呢！  此处用y轴
+    alpha_ref_axis = array([0, 1])  # alpha的参考轴
+    alpha_mi = get_ang_2d(mi_rot, alpha_ref_axis)  # 逆时针为正
+    alpha_si = get_ang_2d(si_rot, alpha_ref_axis)  #
     # print('alpha:', alpha)
 
     alpha = alpha_mi - alpha_si
@@ -185,7 +197,10 @@ if __name__ == '__main__':
     pt_s_1 = pt_1 + t_vect  # sr
     pt_s_2 = pt_2 + t_vect  # si
     pt_s_n_1 = pt_n_1  # sr_n
-    pt_s_n_s = pt_n_2  # si_n
+    pt_s_n_2 = pt_n_2  # si_n
+
+    a = get_alpha(pt_1, pt_2, pt_n_2, pt_s_1, pt_s_2, pt_s_n_2)
+    print('a:', a)
 
     # Tmg:
     Tmg = -pt_1  # 参考点
@@ -193,12 +208,12 @@ if __name__ == '__main__':
     # print(Tsg - Tmg)
 
     # 将模型点和场景参考点变换到统一坐标系
-    pt_m_1 = pt_1 + Tmg  # 变换后的参考点
+    # pt_m_1 = pt_1 + Tmg  # 变换后的模型点  0 0
     pt_m_2 = pt_2 + Tmg
     # print('pt_m_1, pt_m_2:', pt_m_1, pt_m_2)
 
     # 平移变换 场景
-    pt_s_t_1 = pt_s_1 + Tsg
+    # pt_s_t_1 = pt_s_1 + Tsg
     pt_s_t_2 = pt_s_2 + Tsg
     # print('pt_s_t_1, pt_s_t_2:', pt_s_t_1, pt_s_t_2)
 
