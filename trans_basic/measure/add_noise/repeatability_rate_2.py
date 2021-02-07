@@ -6,7 +6,7 @@ from base_trans import *
 from dist import *  # 距离计算
 
 
-# 关键点用来评估检测算法对变换的鲁棒性
+# 关键点用来评估检测算法对噪声的鲁棒性
 
 # 给定两个检测出来的关键点，在经过变换之后，看第二个检测出来的是不是在邻域范围之内
 # 如果是，就认为是重合的
@@ -16,52 +16,22 @@ from dist import *  # 距离计算
 # (rep(X,Y) + ep(Y,X)) / 2
 
 
-# 索引一致的情况 (可以通过索引找到关键点)
-# 给定两组点 以及变换
-def get_repeate_rate(pcd_np_1, pcd_np_2, r_mat, t_vect):
-    # 首先将模型变换到场景
-    pcd_np_trans = dot(r_mat, pcd_np_1.T).T + t_vect
-
-    repeat_num = 0
-    all_repeat = min(len(pcd_np_1), len(pcd_np_2))  # 取出较小的一组
-
-    p_num = len(pcd_np_1)
-    for pt_idx in range(p_num):  # 变换后的 参照点
-        pt_1 = pcd_np_trans[pt_idx]
-        pt_2 = pcd_np_2[pt_idx]
-
-        dist = sqrt(sum((pt_1 - pt_2) ** 2))
-        # print(dist)
-
-        if dist < 1:
-            repeat_num += 1
-
-    repeat_rate = repeat_num / all_repeat
-    # print(repeat_rate)
-
-    return repeat_rate
-
-
 # 索引不一致
-# 搜索得到最近邻
-# 输入是关键点
-def get_repeate_rate_2(pcd_np_1, pcd_np_2, r_mat, t_vect):
-    repeat_num = 0
+# 思路，把第一组里面的点分别放倒第二组里面，然后检测最近邻
+# 这样只需要构建一个pcd文件即可，添加进去的点索引是最后一位
+# dist_threshold 小于阈值就认为是重复
+def get_repeate_rate_2(pcd_np_1, pcd_np_2, dist_threshold):  # 第一位是GT  第二位是待检测
 
     vici_num = 2  # 2近邻 包含他自己
-
-    # 首先将模型变换到场景
-    pcd_np_trans = dot(r_mat, pcd_np_1.T).T + t_vect
 
     pcd1_num = len(pcd_np_1)
     pcd2_num = len(pcd_np_2)
 
+    repeat_num = 0  # 重复点计数器
     all_repeat = min(pcd1_num, pcd2_num)  # 取出较小的一组
 
-    for pt_idx in range(pcd1_num):  # 根据模型中的关键点进行比较
-        pt_1 = pcd_np_trans[pt_idx]
-
-        # print('len(pcd2_np):', len(pcd2_np))
+    for pt_idx in range(pcd1_num):  # 在GT里面拿点
+        pt_1 = pcd_np_1[pt_idx]
 
         # 将变换后的点添加到变换后的场景中
         pcd2_np_temp = pcd_np_2  # 每次都更新
@@ -75,17 +45,15 @@ def get_repeate_rate_2(pcd_np_1, pcd_np_2, r_mat, t_vect):
         # 构建搜索树
         pcd_tree_2 = o3d.geometry.KDTreeFlann(pcd2)
 
-        [k, idx, _] = pcd_tree_2.search_knn_vector_3d(pcd2.points[pcd2_num], vici_num)  # 最后一个点的近邻
+        [k, idx, _] = pcd_tree_2.search_knn_vector_3d(pcd2.points[pcd2_num], vici_num)  # 最后一个点的近邻 pcd2_num 就是最后添加进去的索引
         vici_idx = idx[1:]
-        # asarray(pcd.colors)[vici_idx_1, :] = [0, 0, 1]
 
         vici_pts = array(pcd2.points)[vici_idx]
-        # all_pts = array(pcd.points)[idx]
 
         dist = sqrt(sum((pt_1 - vici_pts)**2))
         print(dist)
 
-        if dist < 1:  # 距离阈值
+        if dist < dist_threshold:  # 距离阈值
             repeat_num += 1
 
         # print(pt_idx / all_repeat)
@@ -126,20 +94,28 @@ if __name__ == '__main__':
     # 先直接使用原始数据
     # 基于索引,然后查找最近点,如果距离小于某个数值就算重合
 
-    # 加载保存的关键点
+    noise_rate = 0.01
+
+    data_root = 'D:/SIA/data_benchmark/'
+
+    # 上层：不同模型
+    model_list = ['ant', 'armadillo', 'bird_3', 'bust', 'girl', 'hand_3', 'camel', 'teddy', 'table_2', 'rabbit']
+    # for model_name in model_list:
+    model_name = 'armadillo'
+
+    # 每个文件：不同vici_num的文件
+    # vici_num_list = [5, 6, 7, 8, 9, 10, 11]
+    # for vici_num in vici_num_list:  # 关键点索引
+    # 加载保存的 1.对应的模型 2.关键点索引
+
     key_pts_buff_1 = loadtxt('save_file/key_pts_buff_1.txt')
     key_pts_buff_2 = loadtxt('save_file/key_pts_buff_2.txt')
 
-    # 对第一个变换
-
-    # 定义变换
-    r = R.from_rotvec(pi / 180 * array([30, 60, 30]))  # 角度->弧度
-    # r = R.from_rotvec(pi / 180 * array([0, 0, 10]))  # 角度->弧度
-    r_mat = r.as_matrix()
-    t_vect = array([150, -2, -8], dtype='float')
-    # print('r_mat:\n', r_mat)
+    # 转换成两组np
+    # key_pts_buff_1 =
+    # key_pts_buff_2 =
 
     # 比较
-    ra = get_repeate_rate_2(key_pts_buff_1, key_pts_buff_2, r_mat, t_vect)  # pcd_np_1, pcd_np_2, r_mat, t_vect
+    ra = get_repeate_rate_2(key_pts_buff_1, key_pts_buff_2)  # pcd_np_1, pcd_np_2, r_mat, t_vect
 
     print('重复率', ra)

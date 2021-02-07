@@ -149,3 +149,21 @@ def keypoints_to_spheres(keypoints):
         spheres += sphere
     spheres.paint_uniform_color([1.0, 0.75, 0.0])
     return spheres
+
+
+def mesh2pcd(mesh_in):
+
+    mesh_vertices = array(mesh_in.vertices)  # nx3
+    # print('pcd1_num:', len(mesh_vertices))
+
+    pcd = o3d.geometry.PointCloud()
+    pcd.points = o3d.utility.Vector3dVector(mesh_vertices)
+
+    pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=8, max_nn=10))
+
+    return pcd
+
+
+def mesh2np(mesh_in):
+    mesh_vertices = array(mesh_in.vertices)  # nx3
+    return mesh_vertices
