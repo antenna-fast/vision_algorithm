@@ -20,22 +20,6 @@ def get_var(a):
     return var_a
 
 
-a = array([[1, 0, 0],
-           [0, 1, 0],
-           [0, 0, 1],
-           [1, 1, 1]])
-
-var_a = get_var(a)
-
-# var_a = var(a, axis=0)
-# print(mean_a)
-# print(var_a)
-
-
-a = array([1, 1, 2])
-# print(var(a, axis=0))
-
-
 def vec_proj_scale(vec_1, vec_2):
     # 将向量1投影到向量2  标量
     norm_vec_1 = norm(vec_1)

@@ -3,13 +3,6 @@ import matplotlib.pyplot as plt
 import cv2
 from integral_image import *
 
-# img = zeros((480, 640, 3)).astype(uint8)
-# # img = zeros((480, 640)).astype(uint)
-# # img[:240, :320] = array([200, 0, 0])
-# for i in range(100):
-#     for j in range(100):
-#         img[i][j] = array([0, 200, 0])
-#         # img[i][j] = 200
 
 img = cv2.imread('images.jpg')
 

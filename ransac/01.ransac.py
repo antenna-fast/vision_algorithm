@@ -1,6 +1,5 @@
 import numpy as np
 from numpy import *
-import visdom
 import matplotlib.pyplot as plt
 
 import time

@@ -1,10 +1,5 @@
-from numpy import *
-from numpy.linalg import *
-import open3d as o3d
-
 from o3d_impl import *
 from base_trans import *
-from n_pt_plane import *
 from dist import *  # 距离计算
 
 

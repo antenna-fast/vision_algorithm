@@ -1,6 +1,6 @@
 import open3d as o3d
 
-from module_test.point_to_plane_test import *
+from back.module_test.point_to_plane_test import *
 from n_pt_plane import *
 from base_trans import *
 
@@ -134,14 +134,18 @@ def get_mesh_idx(now_pt, vici_pts):
 
     # * 找到拓扑结构 END
 
-    # 根据顶点和三角形索引创建mesh
-    # mesh = get_non_manifold_vertex_mesh(all_pts, tri_idx)
-
-    # 求mesh normal
-    # mesh.compute_triangle_normals()
-    # mesh_normals = array(mesh.triangle_normals)
-    # print(mesh_normals)
-
     # return mesh, mesh_normals, normal
     return all_pts, tri_idx
 
+
+# 将点转换成球
+# This function is only used to make the keypoints look better on the rendering
+def keypoints_to_spheres(keypoints):
+    spheres = o3d.geometry.TriangleMesh()
+    for keypoint in keypoints.points:
+        sphere = o3d.geometry.TriangleMesh.create_sphere(radius=0.001)
+        # sphere = o3d.geometry.TriangleMesh.create_sphere(radius=0.01)
+        sphere.translate(keypoint)
+        spheres += sphere
+    spheres.paint_uniform_color([1.0, 0.75, 0.0])
+    return spheres

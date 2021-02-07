@@ -1,13 +1,7 @@
-from numpy import *
-from numpy.linalg import *
-import open3d as o3d
-
 from o3d_impl import *
-from base_trans import *
 from dist import *  # 距离计算
 
 import matplotlib.pyplot as plt
-import matplotlib.ticker as ticker
 
 # 加载 1
 pcd = o3d.io.read_point_cloud('../../data_ply/Armadillo.ply')

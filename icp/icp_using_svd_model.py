@@ -27,7 +27,7 @@ pts_1 = array(pts_1)
 # axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=15, origin=[0, 0, 0])
 axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.1, origin=[0, 0, 0])
 
-pts_1_o = o3d.io.read_point_cloud('../../imbalance_points(1)/imbalance_points/data_ply/Armadillo.ply')
+pts_1_o = o3d.io.read_point_cloud('../../back/imbalance_points(1)/imbalance_points/data_ply/Armadillo.ply')
 pts_1_o.paint_uniform_color([0.0, 0.5, 0.5])
 pts_1_o = pts_1_o.voxel_down_sample(voxel_size=2)
 # print("Recompute the normal of the downsampled point cloud")

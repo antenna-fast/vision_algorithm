@@ -43,7 +43,7 @@ print('r_mat:\n', r_mat)
 pcd_trans = dot(r_mat, pcd_trans.T).T
 pcd_trans = pcd_trans + t_vect
 
-
+# 方式1 将噪声塞进去
 if noise_mode == 0:
     mean = array([0, 0, 0])
     cov = eye(3) * 1000
@@ -54,9 +54,9 @@ if noise_mode == 0:
     noise = random.multivariate_normal(mean, cov, noise_pts_num)
     # 对噪声变换到场景坐标系
     noise_trans = dot(r_mat, noise.T).T + t_vect
-    # 方式1 将噪声塞进去
     pcd_trans = vstack((pcd_trans, noise_trans))
 
+# 方式2 对模型点跳动
 if noise_mode == 1:
     mean = array([0, 0, 0])
     cov = eye(3)   # 直径的多少倍率
@@ -69,8 +69,6 @@ if noise_mode == 1:
     # 对噪声变换到场景坐标系
     noise_trans = dot(r_mat, noise.T).T + t_vect
 
-    # 方式2 对模型点跳动
-    # 第二种 不改变点的整体数量,直接对采样的点添加
     rand_choose = np.random.randint(0, pts_num, noise_pts_num)
     pcd_trans[rand_choose] += noise
 
@@ -86,8 +84,7 @@ pcd2.paint_uniform_color([0.0, 0.5, 0.1])
 
 # 构建搜索树
 pcd_tree_2 = o3d.geometry.KDTreeFlann(pcd2)
-# o3d.io.write_point_cloud('D:/pcd_share/pcd_2_01.ply', pcd2)
-# o3d.io.write_point_cloud('D:/pcd_share/pcd_2_01.pcd', pcd2)
+
 
 i = 150
 # 模型1

@@ -82,11 +82,6 @@ pcd2.paint_uniform_color([0.0, 0.5, 0.1])
 # 构建搜索树
 pcd_tree_2 = o3d.geometry.KDTreeFlann(pcd2)
 
-
-# 找到邻域
-# 输入当前点 邻域
-# 输出: mesh, mesh_normals, normal
-
 vici_num = 7
 cut_num = 3
 

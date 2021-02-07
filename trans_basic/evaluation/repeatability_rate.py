@@ -1,5 +1,3 @@
-from numpy import *
-from numpy.linalg import *
 import open3d as o3d
 
 from scipy.spatial.transform import Rotation as R

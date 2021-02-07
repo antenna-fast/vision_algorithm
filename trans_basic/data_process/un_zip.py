@@ -2,6 +2,8 @@ import tarfile
 import gzip
 import os
 
+# SHREC模型
+
 # data_root = 'C:/Users/yaohua-win/Desktop/data/'
 data_root = 'D:/SIA/科研/data/'
 
