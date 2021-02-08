@@ -23,10 +23,8 @@ if __name__ == '__main__':
     ax.set_xlabel('K Ring', font1)  # Add an x-label to the axes.
     ax.set_ylabel('Repeatability', font1)  # Add a y-label to the axes.
     # ax.set_title("Repeatability")  # Add a title to the axes.  # 标题
-    # ax.legend()  # Add a legend.
 
     for y in arange(0, 1.1, 0.1):
-        # y, xmin, xmax, colors=None, linestyles='solid', label=''
         plt.hlines(y, 5, 9, colors="gray", linestyles="dashed")
 
     for axis in [ax.xaxis]:

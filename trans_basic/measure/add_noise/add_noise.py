@@ -40,8 +40,10 @@ def add_noise_func(model_name, pcd, noise_rate, cov_rate):
 
 
 model_list = ['ant', 'armadillo', 'bird_3', 'bust', 'girl', 'hand_3', 'camel', 'teddy', 'table_2', 'rabbit']
+
 # 噪声参数
 noise_list = [0, 0.01, 0.03, 0.05, 0.07, 0.1]  # 在这个里面加上0
+
 cov_rate = 0.00001
 
 for model_name in model_list:

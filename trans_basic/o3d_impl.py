@@ -138,7 +138,7 @@ def get_mesh_idx(now_pt, vici_pts):
     return all_pts, tri_idx
 
 
-# 将点转换成球
+# 将pcd格式点转换成球
 # This function is only used to make the keypoints look better on the rendering
 def keypoints_to_spheres(keypoints):
     spheres = o3d.geometry.TriangleMesh()
@@ -148,6 +148,18 @@ def keypoints_to_spheres(keypoints):
         sphere.translate(keypoint)
         spheres += sphere
     spheres.paint_uniform_color([1.0, 0.75, 0.0])
+    return spheres
+
+
+# np格式的
+def keypoints_np_to_spheres(keypoints, size=0.1, color=[0, 1, 0]):
+    spheres = o3d.geometry.TriangleMesh()
+    for keypoint in keypoints:
+        sphere = o3d.geometry.TriangleMesh.create_sphere(radius=size)
+        # sphere = o3d.geometry.TriangleMesh.create_sphere(radius=0.01)
+        sphere.translate(keypoint)
+        spheres += sphere
+    spheres.paint_uniform_color(color)
     return spheres
 
 
@@ -167,3 +179,11 @@ def mesh2pcd(mesh_in):
 def mesh2np(mesh_in):
     mesh_vertices = array(mesh_in.vertices)  # nx3
     return mesh_vertices
+
+
+def read_mesh(mesh_path, mesh_color=[0.0, 0.6, 0.1]):
+    mesh = o3d.io.read_triangle_mesh(mesh_path)
+    mesh.compute_vertex_normals()
+    mesh.paint_uniform_color(mesh_color)
+
+    return mesh

@@ -1,14 +1,13 @@
 from o3d_impl import *
-from base_trans import *
 from dist import *  # 距离计算
 
 import matplotlib.pyplot as plt
 import matplotlib.ticker as ticker
 
 # 加载 1
-pcd = o3d.io.read_point_cloud('../../data_ply/Armadillo.ply')
-pcd = pcd.voxel_down_sample(voxel_size=2)
-pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=8, max_nn=10))
+pcd = o3d.io.read_point_cloud('D:/SIA/data_benchmark/mesh/Armadillo.ply')
+# pcd = pcd.voxel_down_sample(voxel_size=2)
+# pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=8, max_nn=10))
 pcd.paint_uniform_color([0.4, 0.4, 0.4])
 
 # R = pcd.get_rotation_matrix_from_xyz((0, np.pi, 0))
@@ -36,11 +35,6 @@ pts_num = len(pcd.points)
 threshold = 0.5
 
 i = 6992  # xiongxiong
-# i = 3511  # 耳朵尖  ear
-# i = 2314  # 脚尖
-i = 8805  # 鼻子  可以  nose
-# i = 621  # 胯部
-i = 1671  # 耳朵
 
 import configparser  # 配置文件读取
 

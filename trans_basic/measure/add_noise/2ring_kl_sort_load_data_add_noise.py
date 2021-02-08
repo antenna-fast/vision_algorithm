@@ -27,34 +27,35 @@ for i in range(len(file_list)):
 # model_list = ['bust', 'girl', 'hand_3', 'camel', 'teddy', 'table_2', 'rabbit']
 model_list = file_list
 
-model_name = 'armadillo'
+# model_name = 'armadillo'
 # model_name = 'bust'
 # model_name = 'girl'
-# model_name = 'hand_3'
+model_name = 'hand_3'
 # model_name = 'camel'
 # model_name = 'teddy'
 # model_name = 'table_2'
 # model_name = 'rabbit'
 
 # 对了，主要是讨论不同参数的
+vici_num_list = [5, 6, 7, 8, 9, 10, 11]
+# vici_num_list = [11]
 
-# vici_num_list = [5, 6, 7, 8, 9, 10, 11]
-vici_num_list = [5, 6, 8, 9, 10, 11]  # 漏下的
-
-# vici_num = 7
-# cut_num = vici_num - 3  # 因为
 
 # threshold_list = []
 
 # threshold = 0.5  # ant
 # threshold = 1.9  # 数大 点少  camel
 # threshold = 1.9  # girl  not use
-# threshold = 2.9  # armadillo  大概100点
-threshold = 2.5  # armadillo  大概100点
+# threshold = 2.5  # armadillo  大概100点
+# threshold = 1.3  # rabbit  大概 点
+# threshold = 2.6  # girl  大概 点
+# threshold = 1.6  # rabbit  大概 点
+threshold = 2.9  # bust  大概 点
 
 
 # 这个是在pcd上的！
 # 要把mesh转成pcd再过来
+
 def detect_2_ring_kl(pcd_in, threshold, vici_num, cut_num):
     pts_num = len(pcd_in.points)
 
@@ -132,13 +133,11 @@ for vici_num in vici_num_list:
 
     # 保存格式：直接保存所有的索引，每次检测都得到一个
     for noise_rate in noise_list:
-        print(noise_rate)
+        print('noise_rate:', noise_rate)
         mesh_root = 'D:/SIA/data_benchmark/mesh_add_noise/'
         mesh_dir = mesh_root + model_name + '/' + str(noise_rate) + '.ply'
 
-        mesh = o3d.io.read_triangle_mesh(mesh_dir)
-        mesh.compute_vertex_normals()
-        mesh.paint_uniform_color([0.0, 0.6, 0.1])
+        mesh = read_mesh(mesh_dir)
 
         # 转pcd
         pcd = mesh2pcd(mesh)
@@ -158,12 +157,3 @@ for vici_num in vici_num_list:
         save_txt_dir = save_root + '/' + str(vici_num) + '_' + str(noise_rate) + '.txt'
 
         savetxt(save_txt_dir, key_pts_buff_1, fmt='%d')
-
-# axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.1, origin=[0, 0, 0])
-
-# o3d.visualization.draw_geometries([
-#     # pcd,
-#                                    axis_pcd,
-#                                    ],
-#                                   window_name='ANTenna3D',
-#                                   )

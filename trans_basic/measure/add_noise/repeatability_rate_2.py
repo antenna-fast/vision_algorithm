@@ -1,10 +1,10 @@
-from numpy import *
-from numpy.linalg import *
-import open3d as o3d
-
-from base_trans import *
+from o3d_impl import *
 from dist import *  # 距离计算
 
+import matplotlib.pyplot as plt
+import matplotlib.ticker as ticker
+
+import os
 
 # 关键点用来评估检测算法对噪声的鲁棒性
 
@@ -16,7 +16,6 @@ from dist import *  # 距离计算
 # (rep(X,Y) + ep(Y,X)) / 2
 
 
-# 索引不一致
 # 思路，把第一组里面的点分别放倒第二组里面，然后检测最近邻
 # 这样只需要构建一个pcd文件即可，添加进去的点索引是最后一位
 # dist_threshold 小于阈值就认为是重复
@@ -50,8 +49,8 @@ def get_repeate_rate_2(pcd_np_1, pcd_np_2, dist_threshold):  # 第一位是GT  �
 
         vici_pts = array(pcd2.points)[vici_idx]
 
-        dist = sqrt(sum((pt_1 - vici_pts)**2))
-        print(dist)
+        dist = sqrt(sum((pt_1 - vici_pts) ** 2))
+        # print(dist)
 
         if dist < dist_threshold:  # 距离阈值
             repeat_num += 1
@@ -59,63 +58,102 @@ def get_repeate_rate_2(pcd_np_1, pcd_np_2, dist_threshold):  # 第一位是GT  �
         # print(pt_idx / all_repeat)
 
     repeat_rate = repeat_num / all_repeat
-    print(repeat_rate)
+    # print(repeat_rate)
 
     return repeat_rate
 
 
-# 准确率
-# 预测正确的结果所占的比例  TP+TN/TP+TN+FP+FN
-def get_accuracy(TP, FP, TN, FN):
-    return (TP+TN)/(TP+TN+FP+FN)
-
-
-# 精确率
-# 所有被识别为正类别的样本中，真正为正样本的比例  TP/TP+FP
-def get_precision(TP, FP):
-    return TP / (TP + FP)
-
-
-# 召回率
-# 所有正样本中，被正确识别为正样本的比例  TP/TP+FN
-def get_recall(TP, FN):
-    return TP / (TP + FN)
-
-# 对于点云的关键点来说
-# 令：
-# TP+FN是模型上的关键点
-# TP是变换后 实际分类为关键点里面真正关键点的数量
-# FN是变换后 真正的关键点，但被分类为N
-# FP是变换后 实际是N 被分成了P
-
-
 if __name__ == '__main__':
 
-    # 先直接使用原始数据
-    # 基于索引,然后查找最近点,如果距离小于某个数值就算重合
-
-    noise_rate = 0.01
-
-    data_root = 'D:/SIA/data_benchmark/'
-
-    # 上层：不同模型
-    model_list = ['ant', 'armadillo', 'bird_3', 'bust', 'girl', 'hand_3', 'camel', 'teddy', 'table_2', 'rabbit']
-    # for model_name in model_list:
-    model_name = 'armadillo'
+    noise_list = [0.01, 0.03, 0.05, 0.07, 0.1]
+    model_list = ['armadillo', 'rabbit', 'camel', 'girl', 'rabbit']
+    # model_list = ['ant', 'armadillo', 'bird_3', 'bust', 'girl', 'hand_3', 'camel', 'teddy', 'table_2', 'rabbit']
+    # temp list  # 没有完全检测完，所以暂时
 
     # 每个文件：不同vici_num的文件
-    # vici_num_list = [5, 6, 7, 8, 9, 10, 11]
-    # for vici_num in vici_num_list:  # 关键点索引
-    # 加载保存的 1.对应的模型 2.关键点索引
+    vici_num_list = [5, 6, 7, 8, 9, 10, 11]
 
-    key_pts_buff_1 = loadtxt('save_file/key_pts_buff_1.txt')
-    key_pts_buff_2 = loadtxt('save_file/key_pts_buff_2.txt')
+    dist_threshold = 0.02  # 距离小于阈值，就认为重复
+    data_root = 'D:/SIA/data_benchmark/'
 
-    # 转换成两组np
-    # key_pts_buff_1 =
-    # key_pts_buff_2 =
+    font_1 = {'family': 'Times New Roman',
+              'weight': 'normal',
+              'size': 13,
+              }
 
-    # 比较
-    ra = get_repeate_rate_2(key_pts_buff_1, key_pts_buff_2)  # pcd_np_1, pcd_np_2, r_mat, t_vect
+    for noise_rate in noise_list:
+        # noise_rate = 0.05
+        # noise_rate = 0.07
+        # noise_rate = 0.1
 
-    print('重复率', ra)
+        # 上层：不同噪声  作为legend
+
+        repeat_rate_buff = {}  # 不同模型 所有邻域的重复率 集成 # 清空
+        for model_name in model_list:
+            # model_name = 'armadillo'
+
+            vici_buff = []
+            for vici_num in vici_num_list:  # 关键点索引
+                # print('vici_num:', vici_num)
+                # 加载保存的 1.对应的模型
+                mesh_gt_path = data_root + 'mesh_add_noise/' + model_name + '/' + '0.ply'  # noise == 0
+                mesh_noise_path = data_root + 'mesh_add_noise/' + model_name + '/' + str(noise_rate) + '.ply'  # others
+
+                mesh_gt = o3d.io.read_triangle_mesh(mesh_gt_path)
+                mesh_noise = o3d.io.read_triangle_mesh(mesh_noise_path)
+                # 2.关键点索引
+                idx_gt_path = data_root + 'mesh_add_noise_save/' + model_name + '/' + str(vici_num) + '_' + str(0) + '.txt'
+                idx_noise_path = data_root + 'mesh_add_noise_save/' + model_name + '/' + str(vici_num) + '_' +\
+                                 str(noise_rate) + '.txt'
+
+                idx_gt = loadtxt(idx_gt_path).astype('int')
+                idx_noise = loadtxt(idx_noise_path).astype('int')
+
+                # mesh转换成np
+                key_pts_buff_1 = mesh2np(mesh_gt)[idx_gt]
+                key_pts_buff_2 = mesh2np(mesh_noise)[idx_noise]
+                # print('key_pts_buff_1:\n', key_pts_buff_1)
+
+                # 比较
+                ra = get_repeate_rate_2(key_pts_buff_1, key_pts_buff_2, dist_threshold)
+                # print('重复率', ra)
+
+                vici_buff.append(ra)  # 所有邻域下的重复率
+
+            # print('vici_buff:', vici_buff)
+            repeat_rate_buff[model_name] = vici_buff
+
+        print(repeat_rate_buff)
+
+        # 对所有的模型（或者噪声）进行保存
+        save_root = 'D:/SIA/data_benchmark/mesh_noise_repeat_rate/'
+        repeat_rate_path = save_root   # 所有模型 重复率的保存目录
+
+        if not(os.path.exists(repeat_rate_path)):
+            os.mkdir(repeat_rate_path)
+
+        repeat_rate_path += (str(noise_rate) + '.npy')
+        # savetxt(repeat_rate_path, repeat_rate_buff)
+        save(repeat_rate_path, repeat_rate_buff)
+
+        # 绘图
+        fig, ax = plt.subplots()  # Create a figure and an axes.
+
+        for m_name in model_list:
+            data_rep = repeat_rate_buff[m_name]
+            plt.plot(vici_num_list, data_rep, marker='o')
+
+        plt.legend(model_list, prop=font_1)  # 示意
+
+        ax.set_xlabel('K points', font_1)  # Add an x-label to the axes.
+        ax.set_ylabel('Repeatability', font_1)  # Add a y-label to the axes.
+
+        # 加上标尺
+        for y in arange(0.3, 1.1, 0.1):
+            plt.hlines(y, 5, 11, colors="", linestyles="dashed")
+
+        save_fig_path = 'D:/SIA/data_benchmark/fig/' + str(dist_threshold) + '_' + str(noise_rate) + '.jpg'
+        plt.savefig(save_fig_path)
+
+        # plt.show()
+

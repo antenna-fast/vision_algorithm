@@ -22,10 +22,10 @@ angles = np.linspace(0, 2*np.pi, n_angles, endpoint=False)[..., np.newaxis]
 # points in the (x, y) plane.
 x = np.append(0, (radii*np.cos(angles)).flatten())
 y = np.append(0, (radii*np.sin(angles)).flatten())
-
 # Compute z to make the pringle surface.
 # z = np.sin(-x*y)
 z = x
+
 
 fig = plt.figure()
 ax = fig.gca(projection='3d')
