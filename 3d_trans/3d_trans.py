@@ -10,7 +10,7 @@ def rot_x(theta):
     c = cos(theta)
     s = sin(theta)
     rx = array([[1, 0, 0, 0],
-                [0, c, -1*s, 0],
+                [0, c, -1 * s, 0],
                 [0, s, c, 0],
                 [0, 0, 0, 1]])
     return rx
@@ -21,7 +21,7 @@ def rot_y(theta):
     s = sin(theta)
     ry = array([[c, 0, s, 0],
                 [0, 1, 0, 0],
-                [-1*s, 0, c, 0],
+                [-1 * s, 0, c, 0],
                 [0, 0, 0, 1]])
     return ry
 
@@ -29,11 +29,12 @@ def rot_y(theta):
 def rot_z(theta):
     c = cos(theta)
     s = sin(theta)
-    rz = array([[c, -1*s, 0, 0],
+    rz = array([[c, -1 * s, 0, 0],
                 [s, c, 0, 0],
                 [0, 0, 1, 0],
                 [0, 0, 0, 1]])
     return rz
+
 
 # 复合旋转,可以完成计算之后使用 cs记号简化三角函数计算
 
@@ -46,9 +47,9 @@ def rot_z(theta):
 
 if __name__ == '__main__':
     print()
-    ang2rad = pi/180
+    ang2rad = pi / 180
     a = array([1, 0, 0, 1])  # 齐次坐标
-    rz = rot_z(45*ang2rad)
+    rz = rot_z(45 * ang2rad)
     # print(rz)
 
     rot_vec = dot(rz, a)

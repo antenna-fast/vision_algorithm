@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 # from o3d_impl import *
 
 
-# 根据近邻点 求出平面坐标系
+# 根据近邻点 求出平面坐标系  PCA局部坐标系拟合
 def get_coord(now_pt, vici_pts):
     # average_data = np.mean(vici_pts, axis=0)  # 求 NX3 向量的均值
     # decentration_matrix = vici_pts - average_data  # 邻域点连接到顶点的向量
@@ -23,11 +23,12 @@ def get_coord(now_pt, vici_pts):
 
 
 if __name__ == '__main__':
+    # test
 
     # 定义平面方程
     p = array([1, 1, 1, -10])  # z如果相对于点的长宽太小 看上是过原点
     p_n = p[:3]
-    # 注意 平面要按照方程生成！
+    # 注意 平面要按照方程生成
     pts_buff = []
     for i in range(-10, 10):
         for j in range(-10, 10):
@@ -36,7 +37,6 @@ if __name__ == '__main__':
             # pts_buff.append([i, j, abs(z)])
 
     pts_buff = array(pts_buff)
-    # pts = copy.deepcopy(pts_buff)
     pts = pts_buff
 
     # ax = plt.figure(1).gca(projection='3d')
@@ -89,16 +89,3 @@ if __name__ == '__main__':
     ax.set_zlabel("Z Axis")
     plt.title('point cloud')
     plt.show()
-
-    axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=8, origin=[0, 0, 0])
-
-    o3d.visualization.draw_geometries([mesh,
-                                       axis_pcd
-                                       ],
-                                      window_name='ANTenna3D',
-                                      # zoom=0.3412,
-                                      # front=[0.4257, -0.2125, -0.8795],
-                                      # lookat=[2.6172, 2.0475, 1.532],
-                                      # up=[-0.0694, -0.9768, 0.2024]
-                                      # point_show_normal=True
-                                      )

@@ -2,8 +2,11 @@ from numpy import *
 import matplotlib.pyplot as plt
 
 
+# 霍夫直线检测
+# 基本思想练习.其他的只需要更换投票函数
+
 if __name__ == '__main__':
-    print()
+    print('Hough line detect...')
 
     # gen_data
     # define y=2*x + 3

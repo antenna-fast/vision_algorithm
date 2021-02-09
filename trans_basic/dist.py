@@ -2,6 +2,8 @@ from numpy import *
 from numpy.linalg import *
 
 
+# 各种距离度量
+
 # 欧式距离
 def get_oclide(vec1, vec2):
     dist = sum((vec1 - vec2)**2)
@@ -30,14 +32,6 @@ def get_KL(vec1, vec2, vec_len):
     return dist
 
 
-# # test kl  非负：P>Q即可
-# a = array([0.1, 0.1, 0.3, 0.4])
-# b = array([0.1, 0.9, 0.7, 0.6])
-# a = a/sum(a)
-# b = b/sum(b)
-# print('kl:', get_KL(a, b, 4))
-
-
 # 输入一个序列  输出是否不平衡
 def get_unbalance(vec, threshold):
     len_vec = len(vec)
@@ -61,3 +55,10 @@ if __name__ == '__main__':
     a = array([3, 2, 4, 5, 1, 9])  # 序列
     res = get_unbalance(a, 1)
     print('res:', res)
+
+    # # test kl  非负：P>Q即可
+    # a = array([0.1, 0.1, 0.3, 0.4])
+    # b = array([0.1, 0.9, 0.7, 0.6])
+    # a = a/sum(a)
+    # b = b/sum(b)
+    # print('kl:', get_KL(a, b, 4))

@@ -1,12 +1,11 @@
 from numpy import *
 import open3d as o3d
 
-# off文件
-# 测试数据读取
 
-# f = open('D:/数据集/shrec_training/0002.holes.1.off')
+# SHREC
+# off文件测试数据读取
+
 f = open('D:/数据集/shrec_training/0002.microholes.1.off')
-# print(f.readlines())
 
 for i in range(2):
     a = f.readline()
@@ -24,7 +23,6 @@ for i in range(pts_num):
     pts_buf.append(pt)
 
 pts_buf = array(pts_buf)
-
 # print(pts_buf)
 
 pcd = o3d.geometry.PointCloud()
