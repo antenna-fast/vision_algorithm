@@ -24,8 +24,13 @@ import os
 # model_name = 'hand_3'
 # model_name = 'camel'
 # model_name = 'teddy'
-model_name = 'rabbit'
-
+# model_name = 'rabbit'
+# model_name = 'octopus'
+# model_name = 'dog_2'
+# model_name = 'cow'
+# model_name = 'cactus'
+# model_name = 'fish'
+model_name = 'bird_2'
 
 vici_num = 7
 cut_num = 4

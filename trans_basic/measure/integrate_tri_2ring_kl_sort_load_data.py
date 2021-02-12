@@ -1,5 +1,4 @@
 from o3d_impl import *
-from base_trans import *
 from dist import *  # 距离计算
 import os
 
@@ -24,7 +23,19 @@ file_list = os.listdir(out_path)  # 所有的模型
 # model_name = 'camel'
 # model_name = 'teddy'
 # model_name = 'table_2'
-model_name = 'rabbit'
+# model_name = 'rabbit'
+# model_name = 'octopus'
+# model_name = 'teapot_2'
+# model_name = 'glasses'
+# model_name = 'dog_2'
+# model_name = 'chair_4'
+# model_name = 'chair_5'
+# model_name = 'cow'
+# model_name = 'cactus'
+# model_name = 'cup'
+# model_name = 'airplane_4'
+# model_name = 'fish'
+model_name = 'bird_2'
 
 
 data_path = out_path + model_name + '.ply'
@@ -42,7 +53,7 @@ pcd_tree_1 = o3d.geometry.KDTreeFlann(pcd)
 
 
 # 加噪声
-noise_rate = 0.07  # 噪声占比  不同的噪声占比生成不同的关键点文件
+# noise_rate = 0.07  # 噪声占比  不同的噪声占比生成不同的关键点文件
 
 vici_num = 7
 cut_num = 4
@@ -52,7 +63,7 @@ pts_num = len(pcd.points)
 # threshold = 0.5  # ant
 # threshold = 1.9  # 数大 点少  camel
 # threshold = 1.9  # girl  not use
-threshold = 0.9  #
+threshold = 0.8  #
 
 # i = 150
 # 模型1

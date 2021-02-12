@@ -32,10 +32,6 @@ for vici_num in vici_num_list:  # 关键点索引
     mesh_gt = read_mesh(mesh_gt_dir)
     mesh_noise = read_mesh(mesh_noise_dir)
 
-    # print('idx_gt:', idx_gt_path)
-    # print('mesh_gt_dir:', mesh_gt_dir)
-    # print('mesh_gt:', mesh_gt)
-
     all_pts_gt = mesh2np(mesh_gt)
     all_pts_noise = mesh2np(mesh_noise)
 

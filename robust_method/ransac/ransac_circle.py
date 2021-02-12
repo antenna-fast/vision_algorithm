@@ -1,5 +1,5 @@
 from numpy import *
 
 
-# define a circle
+# 生成数据
 #

@@ -23,7 +23,15 @@ file_list = os.listdir(out_path)  # 所有的模型
 # model_name = 'camel'
 # model_name = 'teddy'
 # model_name = 'table_2'
-model_name = 'rabbit'
+# model_name = 'rabbit'
+# model_name = 'copotus'
+# model_name = 'dog_2'
+# model_name = 'chair_4'
+# model_name = 'cow'
+# model_name = 'cactus'
+# model_name = 'airplane_4'
+# model_name = 'fish'
+model_name = 'bird_2'
 
 # 模型路径
 data_path = out_path + model_name + '.ply'
@@ -121,28 +129,13 @@ for i in gt_idx:
     save_vec = vstack((n_fn_angle_1, n_fn_angle_buff_1))
     # print(save_vec.shape)  # 每一个关键点，都有7x4的特征
 
-    f_name = 'feature_bag/' + model_name + '/' + model_name + '_gt_' + str(i) + '.txt'  # 所以这些保存的都是0开头的
+    f_dir = 'feature_bag/' + model_name + '/'
+    if not(os.path.exists(f_dir)):
+        os.mkdir(f_dir)
+
+    f_name = f_dir + model_name + '_gt_' + str(i) + '.txt'  # 所以这些保存的都是0开头的
     savetxt(f_name, save_vec)
 
-    # print(n_fn_angle_buff_1)
-    for vic_ang_1 in n_fn_angle_buff_1:
-        # kl
-        # print(len(vic_ang_1))
-        kl_loss = get_KL(vic_ang_1, n_fn_angle_1, cut_num)  # vec1, vec2, vec_len
-
-        # print(kl_loss)
-        kl_buff.append(kl_loss)
-
-    kl_buff = array(kl_buff)
-    # sum_var = var(var_buff)
-    res = get_unbalance(kl_buff, threshold)  # 不平衡点
-
-    if res:
-        pcd.colors[pick_idx] = [1, 0, 0]  # 选一个点
-        # key_pts_buff_1.append(now_pt_1)  # 关键点
-        key_pts_buff_1.append(i)  # 索引
-
-print('key_pts_num:', len(key_pts_buff_1))
 
 axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.1, origin=[0, 0, 0])
 

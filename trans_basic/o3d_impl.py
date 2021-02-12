@@ -1,12 +1,13 @@
 import open3d as o3d
 
-from back.module_test.point_to_plane_test import *
-from n_pt_plane import *
+from point_project import *  # 点投影到面
+from n_pt_plane import *  #
 from base_trans import *
 
 
-# open3d lib function
+# open3d function lib
 
+# 从点和索引构建mesh
 def get_non_manifold_vertex_mesh(verts, triangles):
 
     mesh = o3d.geometry.TriangleMesh()
@@ -14,13 +15,12 @@ def get_non_manifold_vertex_mesh(verts, triangles):
     mesh.triangles = o3d.utility.Vector3iVector(triangles)
     mesh.compute_vertex_normals()
     # mesh.compute_triangle_normals()
-    # mesh.rotate(
-    #     mesh.get_rotation_matrix_from_xyz((np.pi / 4, 0, np.pi / 4)),
-    #     center=mesh.get_center(),
-    # )
     return mesh
 
 
+# 自定义数据处理
+# 从顶点创建mesh
+# 要改名成create_mesh
 def get_mesh(now_pt, vici_pts):
     # 得到邻域构成的面片 得到面片法向量  顶点法向量
     coord = get_coord(now_pt, vici_pts)  # 列向量表示三个轴
@@ -57,11 +57,6 @@ def get_mesh(now_pt, vici_pts):
     # tri_num = len(tri_idx)
     # print(tri_num)
 
-    # if tri_num in histo.keys():
-    #     histo[tri_num] += 1
-    # else:
-    #     histo[tri_num] = 1
-
     # 可视化二维的投影
     # plt.triplot(pts_2d[:, 0], pts_2d[:, 1], tri.simplices.copy())
     # plt.plot(pts_2d[:, 0], pts_2d[:, 1], 'o')
@@ -85,61 +80,42 @@ def get_mesh(now_pt, vici_pts):
     return mesh, mesh_normals, normal
 
 
-def get_mesh_idx(now_pt, vici_pts):
-    # 得到邻域局部坐标系 得到法向量等等
-    # 返回: 顶点坐标 三角形索引
-    coord = get_coord(now_pt, vici_pts)  # 列向量表示三个轴
-    normal = coord[:, 2]  # 第三列
-    # print('coord:\n', coord)
-
-    # 还有一步 利用法向量和中心点,得到平面方程[ABCD]
-    p = get_plan(normal, now_pt)
-
-    # * 找到拓扑结构 START
-    all_pts = vstack((now_pt, vici_pts))
-    # 将周围的点投影到平面
-    plan_pts = []
-    # for pt in all_pts:  # 投影函数可以升级  向量化  map
-    plan_pts = pt_to_plane(all_pts, p, normal)  # px p pn
-    # plan_pts.append(pt_temp)
-
-    # plan_pts = array(plan_pts)  # 投影到平面的点
-
-    # 将投影后的点旋转至z轴,得到投影后的二维点
-    coord_inv = inv(coord)  # 反变换
-
-    # 首先要将平面上的点平移到原点 然后再旋转  其实不平移也是可以的，只要xy平面上的结构不变
-    rota_pts = dot(coord_inv, plan_pts.T).T  # 将平面旋转到与z平行
-
-    # rota_pts[:, 2] = 0  # 已经投影到xoy(最大平面),在此消除z向轻微抖动
-    pts_2d = rota_pts[:, 0:2]
-
-    # Delauney三角化
-    tri = Delaunay(pts_2d)
-    tri_idx = tri.simplices  # 三角形索引
-
-    # 统计三角形的数量
-    # tri_num = len(tri_idx)
-    # print(tri_num)
-
-    # if tri_num in histo.keys():
-    #     histo[tri_num] += 1
-    # else:
-    #     histo[tri_num] = 1
-
-    # 可视化二维的投影
-    # plt.triplot(pts_2d[:, 0], pts_2d[:, 1], tri.simplices.copy())
-    # plt.plot(pts_2d[:, 0], pts_2d[:, 1], 'o')
-    # plt.show()
-
-    # * 找到拓扑结构 END
-
-    # return mesh, mesh_normals, normal
-    return all_pts, tri_idx
+# Q:和上面的有什么区别？
+# def get_mesh_idx(now_pt, vici_pts):
+#     # 得到邻域局部坐标系 得到法向量等等
+#     # 返回: 顶点坐标 三角形索引
+#     coord = get_coord(now_pt, vici_pts)  # 列向量表示三个轴
+#     normal = coord[:, 2]  # 第三列
+#
+#     # 还有一步 利用法向量和中心点,得到平面方程[ABCD]
+#     p = get_plan(normal, now_pt)
+#
+#     # * 找到拓扑结构 START
+#     all_pts = vstack((now_pt, vici_pts))
+#     # 将周围的点投影到平面
+#     plan_pts = pt_to_plane(all_pts, p, normal)  # px p pn
+#
+#     # 将投影后的点旋转至z轴,得到投影后的二维点
+#     coord_inv = inv(coord)  # 反变换
+#
+#     # 首先要将平面上的点平移到原点 然后再旋转  其实不平移也是可以的，只要xy平面上的结构不变
+#     rota_pts = dot(coord_inv, plan_pts.T).T  # 将平面旋转到与z平行
+#
+#     # rota_pts[:, 2] = 0  # 已经投影到xoy(最大平面),在此消除z向轻微抖动
+#     pts_2d = rota_pts[:, 0:2]
+#
+#     # Delauney三角化
+#     tri = Delaunay(pts_2d)
+#     tri_idx = tri.simplices  # 三角形索引
+#     # * 找到拓扑结构 END
+#
+#     return all_pts, tri_idx
 
 
+# 数据变换
 # 将pcd格式点转换成球
 # This function is only used to make the keypoints look better on the rendering
+
 def keypoints_to_spheres(keypoints):
     spheres = o3d.geometry.TriangleMesh()
     for keypoint in keypoints.points:
@@ -181,9 +157,36 @@ def mesh2np(mesh_in):
     return mesh_vertices
 
 
+# 数据加载
 def read_mesh(mesh_path, mesh_color=[0.0, 0.6, 0.1]):
     mesh = o3d.io.read_triangle_mesh(mesh_path)
     mesh.compute_vertex_normals()
     mesh.paint_uniform_color(mesh_color)
 
     return mesh
+
+
+# 可视化
+def draw_line(points, lines, colors):
+
+    line_set = o3d.geometry.LineSet()
+    line_set.points = o3d.utility.Vector3dVector(points)
+    line_set.lines = o3d.utility.Vector2iVector(lines)
+    line_set.colors = o3d.utility.Vector3dVector(colors)
+
+    return line_set
+
+
+def show_pcd(pcd, color=[0.8, 0.3, 0.0]):
+    pcd.paint_uniform_color(color)
+    o3d.visualization.draw_geometries([
+                                    pcd,
+                                    # axis_pcd,
+                                ],
+                                window_name='ANTenna3D',
+                                zoom=1,
+                                front=[0, 10, 0.01],  # 相机位置
+                                lookat=[0, 0, 0],  # 对准的点
+                                up=[0, 1, 0],  # 用于确定相机右x轴
+                                # point_show_normal=True
+                            )

@@ -1,6 +1,4 @@
 import open3d as o3d
-
-from base_trans import *
 from dist import *  # 距离计算
 
 import os
@@ -34,7 +32,7 @@ def add_noise_func(model_name, pcd, noise_rate, cov_rate):
     save_root = 'D:/SIA/data_benchmark/mesh_add_noise/' + model_name + '/'
     if not(os.path.exists(save_root)):
         os.mkdir(save_root)
-    print(noise_rate)
+
     save_path = save_root + str(noise_rate) + '.ply'
     o3d.io.write_triangle_mesh(save_path, pcd)
 

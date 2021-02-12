@@ -10,9 +10,6 @@
 from numpy import *
 
 from sklearn.cluster import DBSCAN
-from sklearn import metrics
-from sklearn.datasets import make_blobs
-from sklearn.preprocessing import StandardScaler
 
 import open3d as o3d
 import o3d_impl
@@ -28,7 +25,15 @@ import scipy.io as scio
 # model_name = 'hand_3'
 # model_name = 'camel'
 # model_name = 'teddy'
-model_name = 'table_2'
+# model_name = 'table_2'
+# model_name = 'octopus'
+# model_name = 'teapot_2'
+# model_name = 'dog_2'
+# model_name = 'cactus'
+# model_name = 'airplane_4'
+# model_name = 'fish'
+model_name = 'bird_2'
+
 
 file_name = '../save_file_kpt_idx/key_pts_buff_idx_' + model_name + '.txt'
 key_pts = loadtxt(file_name, dtype='int')
@@ -54,7 +59,7 @@ pts = array(pcd.points)[key_pts]
 # DBSCAN
 # db = DBSCAN(eps=0.02, min_samples=6).fit(pts)  # 0.02  5  0.3多一点  ant
 # db = DBSCAN(eps=0.04, min_samples=4).fit(pts)  # 0.02  5
-db = DBSCAN(eps=0.03, min_samples=4).fit(pts)  # 0.02  5
+db = DBSCAN(eps=0.04, min_samples=1).fit(pts)  # 0.02  5
 core_samples_mask = zeros_like(db.labels_, dtype=bool)
 core_samples_mask[db.core_sample_indices_] = True
 labels = db.labels_

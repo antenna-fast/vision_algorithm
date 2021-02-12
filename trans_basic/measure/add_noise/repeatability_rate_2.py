@@ -27,7 +27,8 @@ def get_repeate_rate_2(pcd_np_1, pcd_np_2, dist_threshold):  # 第一位是GT  �
     pcd2_num = len(pcd_np_2)
 
     repeat_num = 0  # 重复点计数器
-    all_repeat = min(pcd1_num, pcd2_num)  # 取出较小的一组
+    # all_repeat = min(pcd1_num, pcd2_num)  # 取出较小的一组
+    all_repeat = pcd1_num
 
     for pt_idx in range(pcd1_num):  # 在GT里面拿点
         pt_1 = pcd_np_1[pt_idx]
@@ -73,7 +74,7 @@ if __name__ == '__main__':
     # 每个文件：不同vici_num的文件
     vici_num_list = [5, 6, 7, 8, 9, 10, 11]
 
-    dist_threshold = 0.02  # 距离小于阈值，就认为重复
+    dist_threshold = 0.05  # 距离小于阈值，就认为重复
     data_root = 'D:/SIA/data_benchmark/'
 
     font_1 = {'family': 'Times New Roman',
@@ -114,7 +115,7 @@ if __name__ == '__main__':
                 key_pts_buff_2 = mesh2np(mesh_noise)[idx_noise]
                 # print('key_pts_buff_1:\n', key_pts_buff_1)
 
-                # 比较
+                # 比较  gt noise threshold
                 ra = get_repeate_rate_2(key_pts_buff_1, key_pts_buff_2, dist_threshold)
                 # print('重复率', ra)
 
