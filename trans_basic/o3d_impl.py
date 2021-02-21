@@ -157,6 +157,14 @@ def mesh2np(mesh_in):
     return mesh_vertices
 
 
+def np2pcd(pcd_np):
+    pcd = o3d.geometry.PointCloud()
+    pcd.points = o3d.utility.Vector3dVector(pcd_np)
+    pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.05, max_nn=10))
+
+    return pcd
+
+
 # 数据加载
 def read_mesh(mesh_path, mesh_color=[0.0, 0.6, 0.1]):
     mesh = o3d.io.read_triangle_mesh(mesh_path)
@@ -167,6 +175,8 @@ def read_mesh(mesh_path, mesh_color=[0.0, 0.6, 0.1]):
 
 
 # 可视化
+# points 顶点坐标  np格式
+# lines 索引  nx2索引
 def draw_line(points, lines, colors):
 
     line_set = o3d.geometry.LineSet()
@@ -175,6 +185,16 @@ def draw_line(points, lines, colors):
     line_set.colors = o3d.utility.Vector3dVector(colors)
 
     return line_set
+
+# 划线测试
+# a = array([[0, 0, 0], [1, 0, 0]]) * 0.01
+# b = array([[0, 0, 0], [0, 1, 0]]) * 0.01
+# c = array([[0, 0, 0], [0, 0, 1]]) * 0.01
+# ab = r_[a, b, c]
+# print(ab)
+# idx = array([[0, 1], [2, 3], [4, 5]])
+# color = array([0, 0, 1])
+# colors = tile(color, (len(idx), 1))
 
 
 def show_pcd(pcd, color=[0.8, 0.3, 0.0]):

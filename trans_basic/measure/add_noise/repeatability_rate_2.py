@@ -6,6 +6,7 @@ import matplotlib.ticker as ticker
 
 import os
 
+
 # 关键点用来评估检测算法对噪声的鲁棒性
 
 # 给定两个检测出来的关键点，在经过变换之后，看第二个检测出来的是不是在邻域范围之内
@@ -74,12 +75,12 @@ if __name__ == '__main__':
     # 每个文件：不同vici_num的文件
     vici_num_list = [5, 6, 7, 8, 9, 10, 11]
 
-    dist_threshold = 0.05  # 距离小于阈值，就认为重复
+    dist_threshold = 0.1  # 距离小于阈值，就认为重复
     data_root = 'D:/SIA/data_benchmark/'
 
     font_1 = {'family': 'Times New Roman',
               'weight': 'normal',
-              'size': 13,
+              'size': 18,  # 2021.2.18 加大了字体
               }
 
     for noise_rate in noise_list:
@@ -103,8 +104,9 @@ if __name__ == '__main__':
                 mesh_gt = o3d.io.read_triangle_mesh(mesh_gt_path)
                 mesh_noise = o3d.io.read_triangle_mesh(mesh_noise_path)
                 # 2.关键点索引
-                idx_gt_path = data_root + 'mesh_add_noise_save/' + model_name + '/' + str(vici_num) + '_' + str(0) + '.txt'
-                idx_noise_path = data_root + 'mesh_add_noise_save/' + model_name + '/' + str(vici_num) + '_' +\
+                idx_gt_path = data_root + 'mesh_add_noise_save/' + model_name + '/' + str(vici_num) + '_' + str(
+                    0) + '.txt'
+                idx_noise_path = data_root + 'mesh_add_noise_save/' + model_name + '/' + str(vici_num) + '_' + \
                                  str(noise_rate) + '.txt'
 
                 idx_gt = loadtxt(idx_gt_path).astype('int')
@@ -128,9 +130,9 @@ if __name__ == '__main__':
 
         # 对所有的模型（或者噪声）进行保存
         save_root = 'D:/SIA/data_benchmark/mesh_noise_repeat_rate/'
-        repeat_rate_path = save_root   # 所有模型 重复率的保存目录
+        repeat_rate_path = save_root  # 所有模型 重复率的保存目录
 
-        if not(os.path.exists(repeat_rate_path)):
+        if not (os.path.exists(repeat_rate_path)):
             os.mkdir(repeat_rate_path)
 
         repeat_rate_path += (str(noise_rate) + '.npy')
@@ -138,7 +140,10 @@ if __name__ == '__main__':
         save(repeat_rate_path, repeat_rate_buff)
 
         # 绘图
-        fig, ax = plt.subplots()  # Create a figure and an axes.
+        fig, ax = plt.subplots(
+            # figsize=(4, 3),
+                               # dpi=300
+                               )  # Create a figure and an axes.
 
         for m_name in model_list:
             data_rep = repeat_rate_buff[m_name]
@@ -146,15 +151,17 @@ if __name__ == '__main__':
 
         plt.legend(model_list, prop=font_1)  # 示意
 
-        ax.set_xlabel('K points', font_1)  # Add an x-label to the axes.
+        ax.set_xlabel('N', font_1)  # Add an x-label to the axes.
         ax.set_ylabel('Repeatability', font_1)  # Add a y-label to the axes.
 
         # 加上标尺
         for y in arange(0.3, 1.1, 0.1):
             plt.hlines(y, 5, 11, colors="", linestyles="dashed")
 
-        save_fig_path = 'D:/SIA/data_benchmark/fig/' + str(dist_threshold) + '_' + str(noise_rate) + '.jpg'
+        # plt.show()
+
+        save_fig_path = 'D:/SIA/data_benchmark/fig_noise_rep_2.18/' + str(dist_threshold) + '_' + str(
+            noise_rate) + '.jpg'
         plt.savefig(save_fig_path)
 
         # plt.show()
-
