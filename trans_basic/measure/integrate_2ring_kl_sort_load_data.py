@@ -1,7 +1,6 @@
 from o3d_impl import *
 from dist import *  # 距离计算
 import os
-
 import scipy.io as io
 
 # 加载数据集里的点云，检测后保存顶点索引
@@ -35,35 +34,32 @@ file_list = os.listdir(out_path)  # 所有的模型
 # model_name = 'cup'
 # model_name = 'airplane_4'
 # model_name = 'fish'
-model_name = 'bird_2'
+# model_name = 'bird_2'
+# data_path = out_path + model_name + '.ply'
 
+model_name = 'airplanesPly'
+num_model = 4
+data_path = 'D:/SIA/Dataset/SHREC/unzip_1/airplanesPly/b' + str(num_model) + '.ply'
 
-data_path = out_path + model_name + '.ply'
 pcd = o3d.io.read_point_cloud(data_path)
-
 print(pcd)
-# pcd = pcd.voxel_down_sample(voxel_size=0.02)  # 不能下采样  否则改变索引
-# print(pcd)
+
 pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.005, max_nn=10))
 # pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.8, max_nn=10))
 # pcd.paint_uniform_color([0.0, 0.5, 0.1])
 pcd.paint_uniform_color([0.0, 0.6, 0.0])
-# 构建搜索树
-pcd_tree_1 = o3d.geometry.KDTreeFlann(pcd)
 
-
-# 加噪声
-# noise_rate = 0.07  # 噪声占比  不同的噪声占比生成不同的关键点文件
+pcd_tree_1 = o3d.geometry.KDTreeFlann(pcd)  # 构建搜索树
 
 vici_num = 7
-cut_num = 4
+cut_num = vici_num - 4
 
 pts_num = len(pcd.points)
 
 # threshold = 0.5  # ant
 # threshold = 1.9  # 数大 点少  camel
-# threshold = 1.9  # girl  not use
-threshold = 0.8  #
+threshold = 1.9  # girl  not use
+# threshold = 0.8  #
 
 # i = 150
 # 模型1
@@ -120,6 +116,7 @@ for i in range(pts_num):
     for vic_ang_1 in n_fn_angle_buff_1:
         # kl
         # print(len(vic_ang_1))
+        # print(len(n_fn_angle_1))
         vic_ang_1 = sort(vic_ang_1)[:cut_num]  # 规定长度
         kl_loss = get_KL(vic_ang_1, n_fn_angle_1, cut_num)  # vec1, vec2, vec_len
 
@@ -143,35 +140,15 @@ savetxt('save_file_kpt_idx/key_pts_buff_idx_' + model_name + '.txt', key_pts_buf
 # a = array([1, 2, 3, 4])
 key_pts_buff_1 = array(key_pts_buff_1) + 1  # matlab的索引从1开始
 s = {'IP_vertex_indices': key_pts_buff_1}
-save_path = 'D:/SIA/科研/Benchmark/3DInterestPoint/3DInterestPoint/IP_BENCHMARK/ALGORITHMs_INTEREST_POINTS/Ours/' + model_name + '.mat'
+save_path = 'D:/SIA/科研/Benchmark/3DInterestPoint/3DInterestPoint/IP_BENCHMARK/ALGORITHMs_INTEREST_POINTS/Ours/SHREC/' + model_name + '.mat'
 io.savemat(save_path, s)
 
-#
-# # 聚类看看
-# from sklearn.cluster import DBSCAN
-#
-# # Compute DBSCAN
-# db = DBSCAN(eps=1, min_samples=3).fit(key_pts_buff_1)
-# core_samples_mask = np.zeros_like(db.labels_, dtype=bool)
-# core_samples_mask[db.core_sample_indices_] = True
-# labels = db.labels_
-#
-# # Number of clusters in labels, ignoring noise if present.
-# n_clusters_ = len(set(labels)) - (1 if -1 in labels else 0)
-# n_noise_ = list(labels).count(-1)
-#
-# print('labels:', labels)
-# unique_labels = set(labels)  # 列表变成集合
-# print(unique_labels)
-#
+# 可视化
 
 axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.1, origin=[0, 0, 0])
 
 o3d.visualization.draw_geometries([pcd,
-                                   # pcd2,
                                    axis_pcd,
-                                   # mesh1,
-                                   # mesh2
                                    ],
                                   window_name='ANTenna3D',
                                   # zoom=0.3412,

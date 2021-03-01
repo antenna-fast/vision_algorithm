@@ -40,7 +40,7 @@ def get_sum(W, X):
 
 # pts_1 模型
 # pts_2 场景
-# 返回: 模型在场景中的位姿
+# 返回: 模型1在场景2中的位姿
 def icp_refine(pts_1, pts_2, W):
 
     pts_m_1 = get_sum(W, pts_1)
@@ -93,7 +93,7 @@ if __name__ == '__main__':
     pts_1 = array(pts_1)
 
     # 定义变换后的点  场景
-    pts_2 = dot(r_mat, pts_1.T).T + t_vect
+    pts_2 = dot(r_mat, pts_1.T).T + t_vect  # 先旋转再平移
 
     # 每对点的权重
     W = eye(len(pts_1))  # 假设每对点的权重都是1
@@ -113,6 +113,6 @@ if __name__ == '__main__':
         print('t:\n', t_res)
 
         # 将场景反变换到模型上（不如直接将模型变换到场景上）
-        pts_1 = dot(r_mat_res, pts_1.T).T + t_res
+        pts_1 = dot(r_mat_res, pts_1.T).T + t_res  # 变换也是先旋转再平移
 
         show_pts(pts_1, pts_2)

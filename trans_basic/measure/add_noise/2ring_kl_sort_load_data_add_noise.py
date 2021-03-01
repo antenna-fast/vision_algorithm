@@ -65,7 +65,7 @@ for vici_num in vici_num_list:
         mesh_root = 'D:/SIA/data_benchmark/mesh_add_noise/'
         mesh_dir = mesh_root + model_name + '/' + str(noise_rate) + '.ply'
 
-        mesh = read_mesh(mesh_dir)
+        mesh = read_mesh(mesh_dir)  # 最底层 文件加载
 
         # 转pcd
         pcd = mesh2pcd(mesh)
@@ -76,12 +76,12 @@ for vici_num in vici_num_list:
 
         # 将结果(每个列表 包含同一个模型不同参数下的噪声相应)保存到对应文件夹
         print('key_pts_num:', len(key_pts_buff_1))
-
         save_root = 'D:/SIA/data_benchmark/mesh_add_noise_save/' + model_name
 
         if not(os.path.exists(save_root)):
             os.mkdir(save_root)
 
+        # 邻域数量 噪声等级
         save_txt_dir = save_root + '/' + str(vici_num) + '_' + str(noise_rate) + '.txt'
 
         savetxt(save_txt_dir, key_pts_buff_1, fmt='%d')

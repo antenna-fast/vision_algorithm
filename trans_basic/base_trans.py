@@ -1,7 +1,6 @@
 from numpy import *
 import numpy as np
 from numpy.linalg import *
-from scipy.spatial.transform import Rotation as R
 from scipy.spatial import Delaunay
 import matplotlib.pyplot as plt
 

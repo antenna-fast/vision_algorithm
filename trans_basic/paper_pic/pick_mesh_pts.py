@@ -2,20 +2,11 @@ from o3d_impl import *
 
 
 # 加载 mesh
-# 在某一部位点击后，立即在模型上绘制圆球
 
 mesh = read_mesh('D:/SIA/data_benchmark/mesh/Armadillo.ply')
 mesh.paint_uniform_color([0.0, 0.5, 0.1])
 # 构建搜索树
 mesh_tree = o3d.geometry.KDTreeFlann(mesh)
-
-# 建立pcd用于搜索，是不是可以直接在mesh上面
-
-# pcd_np = array(pcd.points)  # nx3
-# print('pcd1_num:', len(pcd.points))
-
-# pcd = o3d.geometry.PointCloud()
-# pcd.points = o3d.utility.Vector3dVector(pcd_np)
 
 
 # 用于GUI选点

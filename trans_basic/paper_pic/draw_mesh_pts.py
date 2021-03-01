@@ -1,6 +1,8 @@
 from o3d_impl import *
 
 
+# 手动给定点 画上去
+
 # 在mesh文件上绘制圆球
 # 暂时没有弄其他环上的,只是根据列表得到
 
@@ -18,7 +20,6 @@ pcd_tree = o3d.geometry.KDTreeFlann(pcd)
 idx_list = [6425, 355, 3174]
 
 vici_num = 7
-
 
 size = 0.01
 color = [0, 0, 1]
