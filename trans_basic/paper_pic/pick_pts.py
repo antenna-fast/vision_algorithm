@@ -5,7 +5,8 @@ from o3d_impl import *
 # 按住Shift，点击左键选中
 
 # 加载 1
-pcd = o3d.io.read_point_cloud('D:/SIA/data_benchmark/mesh/Armadillo.ply')
+# pcd = o3d.io.read_point_cloud('D:/SIA/data_benchmark/mesh/Armadillo.ply')
+pcd = o3d.io.read_point_cloud('D:/SIA/Dataset/FoodPackage/out_remove/1.ply')
 # pcd = pcd.voxel_down_sample(voxel_size=2)
 pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=8, max_nn=10))
 pcd.paint_uniform_color([0.0, 0.5, 0.1])

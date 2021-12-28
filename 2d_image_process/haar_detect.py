@@ -16,7 +16,7 @@ if __name__ == '__main__':
     # 积分图
     i_img = get_integral(img_g)
 
-    # 执行haar detect
+    # 执行haar feature
     # haar大小
     width = 3
     height = 8

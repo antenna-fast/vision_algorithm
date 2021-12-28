@@ -3,12 +3,16 @@ import numpy as np
 import random as rsample  # 产生随机数
 import matplotlib.pyplot as plt
 
-import time
-
 from icp_using_svd import *
 
-# RANSAC
+import time
+from copy import deepcopy
 
+# KNN
+from sklearn.neighbors import NearestNeighbors
+
+
+# RANSAC LIB
 
 # 直线
 def get_kb(p1, p2):
@@ -53,7 +57,7 @@ def sample_n(idx_list, n):
 # 这里提供一个框架,换成其他的模型函数即可拟合其他的数据
 # TODO: remove outliers, and expand it to other models
 
-def ransac_line(pts, iter_num):
+def ransac_line(pts, iter_num, inlier_threshold=0.5):
     # ransan 随机采样一致性算法，改进：记录变化趋势，减少随机性
     # 基本思想
     # 1.从所有的数据中进行随机采样，得到一组足以建模的一组数据
@@ -98,7 +102,6 @@ def ransac_line(pts, iter_num):
     confidence = 0  # 模型置信度
     outlier_buff = []  # a set in {nx2}
     # 内外点阈值
-    inlier_threshold = 0.5
     # 通过最佳模型去除外点
     for pt_idx in idx_list:  # all point!  这里可以直接写成矩阵型形式  Ax=b
         pt = pts[pt_idx]
@@ -128,61 +131,81 @@ def ransac_pose(source, target, iter_num, inlier_threshold):
     # iter_num: 迭代次数
     # inlier_threshold: 度量距离小于阈值的视为内点
 
-    data_len = len(source)
+    source_deep = deepcopy(source)  # 深拷贝  开辟新的内存, 否则下面的操作会改变原source!
+
+    data_len = len(source_deep)
     idx_list = list(range(data_len))  # 创建索引随机采样的列表
+
+    # KNN 用于性能度量
+    # 使用模型点与场景点的最近距离作为最终结果的度量标准
+    # 待查询数据(变换完的模型)
+    nbrs = NearestNeighbors(n_neighbors=2, algorithm='ball_tree').fit(target)  # 目标不变
 
     model_buff = []  # 保存k, b, dist
     score_buff = []  # 打分
+
     while iter_num > 0:
         iter_num -= 1
 
         # 1.采样 得到随机不重合的点对
-        random_idx = sample_n(idx_list, 20)  # 每次随机采样几个
-        # pt1, pt2 = pts[random_idx[0]], pts[random_idx[1]]
-        sub_source = source[random_idx]  # 取出匹配的子集
+        random_idx = sample_n(idx_list, 6)  # 每次随机采样几个
+        # print('random_idx:', random_idx)  # 确实是随机的 哈哈哈哈哈多疑了
+
+        sub_source = source_deep[random_idx]  # 取出匹配的子集
         sub_target = target[random_idx]
 
         # 2.从以上样本估计模型 -- ICP  迭代几次看看  其实没啥效果：如果匹配正确，迭代一次就可以得到正确结果
         W = eye(len(sub_source))
 
-        for _ in range(1):  # ICP迭代次数
-            res_mat = icp_refine(sub_source, sub_target, W)  # 模型 场景 加权
+        # ICP这里不再设置过多的中间参数
+        # for _ in range(1):  # ICP迭代次数(没有更新匹配的点，则迭代没有意义，但是实际上我使用了上次的作为初值)
+        # ICP核心，假设点是已经匹配好的，通过最小二乘拟合出一个变换
+        res_mat = icp_refine(sub_source, sub_target, W)  # 模型 场景 加权
 
-            r_mat_res = res_mat[:3, :3]
-            t_res = res_mat[:3, 3:].reshape(-1)
+        r_mat_res = res_mat[:3, :3]  #
+        t_res = res_mat[:3, 3:].reshape(-1)
 
-            # 评价，将全部点云代进去，看哪个位姿的误差小
-            # 用位姿变换模型点云，然后与场景点云求距离
-            # sub_source = dot(r_mat_res, (sub_source + t_res).T).T
-            sub_source = dot(r_mat_res, sub_source.T).T + t_res  # 应当先旋转再平移
+        # 评价，将全部点云代进去，看哪个位姿的误差小
+        # 在整体数据上 评估模型  评价的时候: 如果直接使用
+        source_deep_trans = dot(r_mat_res, source_deep.T).T + t_res  # 根据最小二乘结果模型进行变换
 
-        source_trans = dot(r_mat_res, source.T).T + t_res  # 模型变换到场景上
-        dist = var(norm(source_trans - target, axis=1))  # 计算全局欧氏距离  的方差？？方差：错误的一致性
+        # 改进：变成求最近距离的：模型上求到场景的最近距离，然后求和：根据距离（作为特征进行）匹配？？
 
-        # print('model score:', dist)
+        # # 使用模型点与场景点的最近距离作为最终结果的度量标准
+        # 线上数据
+        distances, indices = nbrs.kneighbors(source_deep_trans)
+        dist = sum(distances.T[1])
+        # print('model score:', dist)  # 问题: 每次采样到的都一样??? 难道是匹配的很好了吗,但显然又不是:写错了待匹配的东西
+
         model_buff.append(res_mat)  # 缓存模型以及评分
         score_buff.append(dist)
 
     model_buff = np.array(model_buff)  # iter_num x 3
     score_buff = np.array(score_buff)
+    # print('score_buff:', score_buff)
 
-    # finally we find min_dist from all model buffer
+    # finally we find the min_dist from all model buffer
     idx = np.argmin(score_buff)  # 取置信度最高的模型参数
     model_param = model_buff[idx]  # in [k, b]
     # print('model_param:', model_param)
 
-    # 下面输出参数作为可选的(耗时).因为不一定所有任务都需要
-    confidence = 0  # 模型置信度
-    # 通过最佳模型去除外点   直接将
+    # 参数检验 通过最佳模型去除外点
+    r_mat_res = model_param[:3, :3]
+    t_res = model_param[:3, 3:].reshape(-1)
 
-    source_trans = dot(r_mat_res, source.T).T + t_res  # 模型变换到场景上
-    dist = np.linalg.norm(source_trans - target, axis=1)  # 计算全局欧氏距离  出来竟然是...一个数值了
-    # print('dist:', dist)
+    source_trans = dot(r_mat_res, source_deep.T).T + t_res  # 模型变换到场景上  source_deep
+    distances, indices = nbrs.kneighbors(source_trans)
+    # dist = distances.T[1]
+    dist = norm(source_trans - target, axis=1) + distances.T[1]
+    # 这样是对应变换后：由于本来的匹配错误，这样如果即使是正确的匹配也会被误认为是错误匹配
+    # 要提高正确匹配的召回率，就得用KNN的方法对实际的数据进行操作
+    # print('model score:', dist)
 
-    outlier_buff = np.where(dist > inlier_threshold)[0]  # 显示的内点 故阈值小外点多 内点少
+    outlier_buff = np.where(dist > inlier_threshold)[0]  # 显示的内点 故阈值小外点多 内点少  丫的 一开始求和完dist又比的
     inlier_buff = array(list(set(idx_list) - set(outlier_buff))).astype(int)
 
-    return model_param, confidence, inlier_buff, outlier_buff
+    dist = sum(dist)
+    return model_param, dist, inlier_buff, outlier_buff
 
 
 if __name__ == '__main__':
@@ -202,7 +225,7 @@ if __name__ == '__main__':
     cov = eye(2) * 3
     noise1 = np.random.multivariate_normal(mean, cov, 15)
 
-    mean = array([-8, 15])  # 正态分布
+    mean = array([0, 15])  # 正态分布
     cov = eye(2) * 5
     noise2 = np.random.multivariate_normal(mean, cov, 25)
     # noise2 = np.random.uniform([0, 4], [10, 14], [10, 2])  # 均匀分布

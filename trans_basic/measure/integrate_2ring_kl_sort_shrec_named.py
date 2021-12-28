@@ -3,37 +3,38 @@ from dist import *  # 距离计算
 
 from detector import detect_2_ring_kl
 
-# 加载数据集里的点云，检测后保存顶点索引
-# 在matlab里面进行可视化（有mesh）
+import os
 
-# 不带b的
-# model_list = ['antsPly', 'octopusPly']
-# 带b的
-# model_list = ['birdsPly', 'fishesPly', 'humansPly', 'birdsPly', 'spectaclesPly']
-# model_list = ['fishesPly']
-# model_list = ['teddyPly']
-# model_list = ['pliersPly']  # 钳子
-# model_list = ['dinosaursPly']  #
-model_list = ['chairsPly']  #
+# 加载数据集里的点云，检测后保存顶点索引
+
+data_root = 'D:/SIA/Dataset/SHREC/SHREC/shrec_training_pcd/'
+
+# model_list = os.listdir(data_root)
+
+master_list = [6]
+
+# 马
+model_list = ['0007.null.0.ply', '0007.localscale.1.ply',
+              '0007.noise.4.ply', '0007.holes.5.ply',
+              '0007.microholes.3.ply', '0007.topology.2.ply']
+for i in range(len(model_list)):
+        model_list[i] = model_list[i].replace('0007', '0009')  # 换成哪一个
 
 # threshold = 0.5  # ant
 # threshold = 1.9  # 数大 点少  camel
 # threshold = 28.9  # 前面两个
-threshold = 20.9  # teddy
+# threshold = 1.3  # teddy
+threshold = 2.3  # teddy
 
 vici_num = 7
-cut_num = vici_num - 4
+cut_num = vici_num - 5
 
 for model_name in model_list:  # 所有的模型
-    print('model_name:', model_name)
-    for model_num in range(1, 6):  # 部分变形  1-5
-        print('model_num:', model_num)
+        print('model_name:', model_name)
+        data_path = 'D:/SIA/Dataset/SHREC/SHREC/shrec_training_pcd/' + model_name
 
-        # 不带b
-        # data_path = 'D:/SIA/Dataset/SHREC/unzip_1/' + model_name + '/' + str(model_num) + '.ply'
-        data_path = 'D:/SIA/Dataset/SHREC/unzip_1/' + model_name + '/b' + str(model_num) + '.ply'
-
-        pcd = o3d.io.read_point_cloud(data_path)
+        mesh = read_mesh(data_path)
+        pcd = mesh2pcd(mesh)
         print(pcd)
 
         pcd.estimate_normals(search_param=o3d.geometry.KDTreeSearchParamHybrid(radius=0.005, max_nn=10))
@@ -47,16 +48,7 @@ for model_name in model_list:  # 所有的模型
         key_pts_buff_1 = detect_2_ring_kl(pcd, threshold, vici_num, cut_num)  # 检测  返回索引
 
         print('key_pts_num:', len(key_pts_buff_1))
-
-        savetxt('save_file_kpt_idx/SHREC/' + model_name + '_' + str(model_num) + '.txt', key_pts_buff_1, fmt='%d')
-        # savetxt('save_file_kpt_idx/key_pts_buff_idx_' + model_name + '.txt', key_pts_buff_1, fmt='%d')
-
-        # matlab服务  此时用不到
-        # key_pts_buff_1 = array(key_pts_buff_1) + 1  # matlab的索引从1开始
-        # s = {'IP_vertex_indices': key_pts_buff_1}
-        # save_path = 'D:/SIA/科研/Benchmark/3DInterestPoint/3DInterestPoint/IP_BENCHMARK/ALGORITHMs_INTEREST_POINTS/Ours' \
-        #             '/SHREC/' + model_name + '/' + str(model_num) + '.mat '
-        # io.savemat(save_path, s)
+        savetxt('save_file_kpt_idx/SHREC11/' + model_name + '.txt', key_pts_buff_1, fmt='%d')
 
 # 可视化
 # axis_pcd = o3d.geometry.TriangleMesh.create_coordinate_frame(size=0.1, origin=[0, 0, 0])

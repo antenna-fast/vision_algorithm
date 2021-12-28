@@ -9,6 +9,7 @@ import time
 
 # SVD实现ICP
 # 基本原理：最小二乘
+# 缺少最近点（或者其他手段）匹配过程
 
 # 效率：目前 100个点1ms
 # 使用方法：迭代，就相当于每次求导并更新
@@ -48,6 +49,8 @@ def icp_refine(pts_1, pts_2, W):
 
     # 定义xi yi
     # 点云数据格式：nxd
+
+    # 去平均值 （简化计算）
     Xi = pts_1 - pts_m_1
     Yi = pts_2 - pts_m_2
 
@@ -77,17 +80,17 @@ def icp_refine(pts_1, pts_2, W):
 
 if __name__ == '__main__':
     # 定义变换
-    r = R.from_rotvec(pi / 180 * array([0, 0, 10]))  # 角度->弧度
-    # r = R.from_rotvec(pi / 180 * array([0, 0, 10]))  # 角度->弧度
+    # r = R.from_rotvec(pi / 180 * array([60, 0, 10]))  # 角度->弧度
+    r = R.from_rotvec(pi / 180 * array([0, 10, 0]))  # 角度->弧度
     r_mat = r.as_matrix()
-    # t_vect = array([10, -2, -8], dtype='float')
-    t_vect = array([1, 1, 0], dtype='float')
-    print('r_mat:\n', r_mat)
+    t_vect = array([10, -2, -8], dtype='float')
+    # t_vect = array([1, 1, 0], dtype='float')
+    print('r_mat_GT:\n', r_mat)
 
     # 定义被配准的点  模型
     pts_1 = []
-    for i in range(10):
-        for j in range(10):
+    for i in range(10, 20):
+        for j in range(10, 30):
             pts_1.append([i, j, 0])
 
     pts_1 = array(pts_1)
@@ -95,24 +98,25 @@ if __name__ == '__main__':
     # 定义变换后的点  场景
     pts_2 = dot(r_mat, pts_1.T).T + t_vect  # 先旋转再平移
 
+    # 加噪声
+
     # 每对点的权重
     W = eye(len(pts_1))  # 假设每对点的权重都是1
 
-    for i in range(3):
-        s_time = time.time()
-        res = icp_refine(pts_1, pts_2, W)  # 模型 场景 对应点的权重
+    s_time = time.time()
+    res = icp_refine(pts_1, pts_2, W)  # 模型 场景 对应点的权重
 
-        r_mat_res = res[:3, :3]
-        t_res = res[:3, 3:].reshape(-1)
+    r_mat_res = res[:3, :3]
+    t_res = res[:3, 3:].reshape(-1)
 
-        e_time = time.time()
+    e_time = time.time()
 
-        print('time_cost:', e_time - s_time)
+    print('time_cost:', e_time - s_time)
 
-        print('r_mat_res:\n', r_mat_res)  # 迭代时，变化已经很小
-        print('t:\n', t_res)
+    print('r_mat_res:\n', r_mat_res)  # 迭代时，变化已经很小
+    print('t:\n', t_res)
 
-        # 将场景反变换到模型上（不如直接将模型变换到场景上）
-        pts_1 = dot(r_mat_res, pts_1.T).T + t_res  # 变换也是先旋转再平移
+    # 将场景反变换到模型上（不如直接将模型变换到场景上）
+    pts_1 = dot(r_mat_res, pts_1.T).T + t_res  # 变换也是先旋转再平移
 
-        show_pts(pts_1, pts_2)
+    show_pts(pts_1, pts_2)

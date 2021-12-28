@@ -5,6 +5,7 @@ from matplotlib.widgets import Slider, Button, RadioButtons
 fig, ax = plt.subplots()
 plt.subplots_adjust(left=0.25, bottom=0.25)
 t = np.arange(0.0, 1.0, 0.001)  # 时间轴
+
 # 初始化参数
 a0 = 5
 f0 = 3

@@ -42,11 +42,9 @@ def rot_z(theta):
 ###########
 # 绕任意轴旋转
 # 这种方法:给定旋转轴与旋转角,得到旋转矩阵?
-# 在PPF里面如何实现?
 
 
 if __name__ == '__main__':
-    print()
     ang2rad = pi / 180
     a = array([1, 0, 0, 1])  # 齐次坐标
     rz = rot_z(45 * ang2rad)
@@ -61,4 +59,4 @@ if __name__ == '__main__':
     inv_rot_vec = dot(inv_rz, rot_vec)
     print('inv_rot_vec:', inv_rot_vec)
 
-    ####### 上面测试了基本的旋转
+    #  上面测试了基本的旋转
